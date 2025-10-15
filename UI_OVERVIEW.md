@@ -116,7 +116,7 @@ The experience form includes:
 
 6. **Number of Fish Caught** (optional)
    - Number input (minimum 0)
-   - Default: 0
+   - Default: 0.
 
 7. **Fish Species** (optional)
    - Text input

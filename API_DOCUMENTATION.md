@@ -69,7 +69,7 @@ Create a new user account.
 ```json
 {
   "message": "User registered successfully",
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "token": "jwt-token-will-be-here",
   "user": {
     "id": 1,
     "email": "john.doe@example.com",
@@ -131,7 +131,7 @@ Authenticate a user and receive a JWT token.
 ```json
 {
   "message": "Login successful",
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "token": "jwt-token-will-be-here",
   "user": {
     "id": 1,
     "email": "john.doe@example.com",
