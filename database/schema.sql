@@ -126,16 +126,13 @@ INSERT INTO WaterClarityConditions (name, description) VALUES
 ('Clear', 'Water is clear with good visibility'),
 ('Slightly Murky', 'Some cloudiness in the water'),
 ('Murky', 'Poor water visibility'),
-('Very Murky', 'Very poor water visibility'),
-('Stained', 'Water has a tea-colored stain');
+('Very Murky', 'Very poor water visibility');
 
 -- Insert default water level conditions
 INSERT INTO WaterLevelConditions (name, description) VALUES
-('Very Low', 'Water level significantly below normal'),
 ('Low', 'Water level below normal'),
 ('Normal', 'Typical water level'),
 ('High', 'Water level above normal'),
-('Very High', 'Water level significantly above normal'),
 ('Flood Stage', 'Water at or near flood stage');
 
 -- Insert some common trout species
