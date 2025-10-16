@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { AuthResponse, Experience } from '../types';
+import { AuthResponse, Experience, LookupData } from '../types';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
 
@@ -39,6 +39,34 @@ export const authAPI = {
   login: async (email: string, password: string): Promise<AuthResponse> => {
     const response = await api.post('/auth/login', { email, password });
     return response.data;
+  },
+};
+
+// Lookups API
+export const lookupsAPI = {
+  getAll: async (): Promise<LookupData> => {
+    const response = await api.get('/lookups/all');
+    return response.data;
+  },
+
+  getStreams: async () => {
+    const response = await api.get('/lookups/streams');
+    return response.data.streams;
+  },
+
+  getSpecies: async () => {
+    const response = await api.get('/lookups/species');
+    return response.data.species;
+  },
+
+  getWeatherConditions: async () => {
+    const response = await api.get('/lookups/weather-conditions');
+    return response.data.weatherConditions;
+  },
+
+  getWaterConditions: async () => {
+    const response = await api.get('/lookups/water-conditions');
+    return response.data.waterConditions;
   },
 };
 

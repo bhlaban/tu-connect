@@ -4,6 +4,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const authRoutes = require('./backend/routes/auth');
 const experiencesRoutes = require('./backend/routes/experiences');
+const lookupsRoutes = require('./backend/routes/lookups');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -16,6 +17,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/experiences', experiencesRoutes);
+app.use('/api/lookups', lookupsRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

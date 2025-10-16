@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { experiencesAPI } from '../services/api';
-import { ExperienceFormData } from '../types';
+import { experiencesAPI, lookupsAPI } from '../services/api';
+import { ExperienceFormData, LookupData } from '../types';
 import './ExperienceForm.css';
 
 const ExperienceForm: React.FC = () => {
@@ -10,17 +10,40 @@ const ExperienceForm: React.FC = () => {
   const isEditMode = !!id;
 
   const [formData, setFormData] = useState<ExperienceFormData>({
-    streamName: '',
+    streamId: undefined,
+    customStreamName: '',
     location: '',
     date: new Date().toISOString().split('T')[0],
-    weather: '',
-    waterCondition: '',
+    weatherConditionId: undefined,
+    waterConditionId: undefined,
     fishCaught: 0,
-    species: '',
+    speciesId: undefined,
+    customSpecies: '',
     notes: '',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [lookupData, setLookupData] = useState<LookupData>({
+    streams: [],
+    species: [],
+    weatherConditions: [],
+    waterConditions: [],
+  });
+  const [useCustomStream, setUseCustomStream] = useState(false);
+  const [useCustomSpecies, setUseCustomSpecies] = useState(false);
+
+  useEffect(() => {
+    const fetchLookupData = async () => {
+      try {
+        const data = await lookupsAPI.getAll();
+        setLookupData(data);
+      } catch (err: any) {
+        console.error('Error loading lookup data:', err);
+      }
+    };
+
+    fetchLookupData();
+  }, []);
 
   useEffect(() => {
     const fetchExperience = async () => {
@@ -28,15 +51,19 @@ const ExperienceForm: React.FC = () => {
         setLoading(true);
         const experience = await experiencesAPI.getById(parseInt(id!));
         setFormData({
-          streamName: experience.streamName,
+          streamId: experience.streamId,
+          customStreamName: experience.customStreamName || '',
           location: experience.location,
           date: experience.date.split('T')[0],
-          weather: experience.weather || '',
-          waterCondition: experience.waterCondition || '',
+          weatherConditionId: experience.weatherConditionId,
+          waterConditionId: experience.waterConditionId,
           fishCaught: experience.fishCaught || 0,
-          species: experience.species || '',
+          speciesId: experience.speciesId,
+          customSpecies: experience.customSpecies || '',
           notes: experience.notes || '',
         });
+        setUseCustomStream(!!experience.customStreamName);
+        setUseCustomSpecies(!!experience.customSpecies);
       } catch (err: any) {
         setError(err.response?.data?.error || 'Failed to load experience');
       } finally {
@@ -55,7 +82,9 @@ const ExperienceForm: React.FC = () => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: name === 'fishCaught' ? parseInt(value) || 0 : value,
+      [name]: name === 'fishCaught' || name === 'streamId' || name === 'speciesId' || name === 'weatherConditionId' || name === 'waterConditionId'
+        ? (value ? parseInt(value) : undefined)
+        : value,
     }));
   };
 
@@ -65,10 +94,19 @@ const ExperienceForm: React.FC = () => {
     setLoading(true);
 
     try {
+      // Clean up data before sending
+      const submitData = {
+        ...formData,
+        streamId: useCustomStream ? undefined : formData.streamId,
+        customStreamName: useCustomStream ? formData.customStreamName : undefined,
+        speciesId: useCustomSpecies ? undefined : formData.speciesId,
+        customSpecies: useCustomSpecies ? formData.customSpecies : undefined,
+      };
+
       if (isEditMode) {
-        await experiencesAPI.update(parseInt(id!), formData);
+        await experiencesAPI.update(parseInt(id!), submitData);
       } else {
-        await experiencesAPI.create(formData);
+        await experiencesAPI.create(submitData);
       }
       navigate('/experiences');
     } catch (err: any) {
@@ -91,17 +129,51 @@ const ExperienceForm: React.FC = () => {
 
       <form onSubmit={handleSubmit} className="experience-form">
         <div className="form-group">
-          <label htmlFor="streamName">Stream Name *</label>
-          <input
-            type="text"
-            id="streamName"
-            name="streamName"
-            value={formData.streamName}
-            onChange={handleChange}
-            required
-            disabled={loading}
-          />
+          <label>
+            <input
+              type="checkbox"
+              checked={useCustomStream}
+              onChange={(e) => setUseCustomStream(e.target.checked)}
+              disabled={loading}
+            />
+            {' '}Enter custom stream name
+          </label>
         </div>
+
+        {useCustomStream ? (
+          <div className="form-group">
+            <label htmlFor="customStreamName">Stream Name *</label>
+            <input
+              type="text"
+              id="customStreamName"
+              name="customStreamName"
+              value={formData.customStreamName}
+              onChange={handleChange}
+              required
+              disabled={loading}
+              placeholder="Enter stream name"
+            />
+          </div>
+        ) : (
+          <div className="form-group">
+            <label htmlFor="streamId">Stream *</label>
+            <select
+              id="streamId"
+              name="streamId"
+              value={formData.streamId || ''}
+              onChange={handleChange}
+              required
+              disabled={loading}
+            >
+              <option value="">Select a stream...</option>
+              {lookupData.streams.map((stream) => (
+                <option key={stream.id} value={stream.id}>
+                  {stream.name} {stream.location ? `(${stream.location})` : ''}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
         <div className="form-group">
           <label htmlFor="location">Location *</label>
@@ -131,40 +203,38 @@ const ExperienceForm: React.FC = () => {
         </div>
 
         <div className="form-group">
-          <label htmlFor="weather">Weather Conditions</label>
+          <label htmlFor="weatherConditionId">Weather Conditions</label>
           <select
-            id="weather"
-            name="weather"
-            value={formData.weather}
+            id="weatherConditionId"
+            name="weatherConditionId"
+            value={formData.weatherConditionId || ''}
             onChange={handleChange}
             disabled={loading}
           >
             <option value="">Select weather...</option>
-            <option value="Sunny">Sunny</option>
-            <option value="Partly Cloudy">Partly Cloudy</option>
-            <option value="Cloudy">Cloudy</option>
-            <option value="Rainy">Rainy</option>
-            <option value="Stormy">Stormy</option>
-            <option value="Foggy">Foggy</option>
+            {lookupData.weatherConditions.map((condition) => (
+              <option key={condition.id} value={condition.id}>
+                {condition.name}
+              </option>
+            ))}
           </select>
         </div>
 
         <div className="form-group">
-          <label htmlFor="waterCondition">Water Condition</label>
+          <label htmlFor="waterConditionId">Water Condition</label>
           <select
-            id="waterCondition"
-            name="waterCondition"
-            value={formData.waterCondition}
+            id="waterConditionId"
+            name="waterConditionId"
+            value={formData.waterConditionId || ''}
             onChange={handleChange}
             disabled={loading}
           >
             <option value="">Select condition...</option>
-            <option value="Clear">Clear</option>
-            <option value="Slightly Murky">Slightly Murky</option>
-            <option value="Murky">Murky</option>
-            <option value="High Flow">High Flow</option>
-            <option value="Low Flow">Low Flow</option>
-            <option value="Normal Flow">Normal Flow</option>
+            {lookupData.waterConditions.map((condition) => (
+              <option key={condition.id} value={condition.id}>
+                {condition.name}
+              </option>
+            ))}
           </select>
         </div>
 
@@ -182,17 +252,49 @@ const ExperienceForm: React.FC = () => {
         </div>
 
         <div className="form-group">
-          <label htmlFor="species">Fish Species</label>
-          <input
-            type="text"
-            id="species"
-            name="species"
-            value={formData.species}
-            onChange={handleChange}
-            disabled={loading}
-            placeholder="e.g., Rainbow Trout, Brown Trout"
-          />
+          <label>
+            <input
+              type="checkbox"
+              checked={useCustomSpecies}
+              onChange={(e) => setUseCustomSpecies(e.target.checked)}
+              disabled={loading}
+            />
+            {' '}Enter custom species
+          </label>
         </div>
+
+        {useCustomSpecies ? (
+          <div className="form-group">
+            <label htmlFor="customSpecies">Fish Species</label>
+            <input
+              type="text"
+              id="customSpecies"
+              name="customSpecies"
+              value={formData.customSpecies}
+              onChange={handleChange}
+              disabled={loading}
+              placeholder="e.g., Rainbow Trout, Brown Trout"
+            />
+          </div>
+        ) : (
+          <div className="form-group">
+            <label htmlFor="speciesId">Fish Species</label>
+            <select
+              id="speciesId"
+              name="speciesId"
+              value={formData.speciesId || ''}
+              onChange={handleChange}
+              disabled={loading}
+            >
+              <option value="">Select species...</option>
+              {lookupData.species.map((species) => (
+                <option key={species.id} value={species.id}>
+                  {species.name} {species.scientificName ? `(${species.scientificName})` : ''}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
         <div className="form-group">
           <label htmlFor="notes">Notes</label>

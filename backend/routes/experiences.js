@@ -10,18 +10,20 @@ router.use(authenticateToken);
 router.post('/', async (req, res) => {
   try {
     const {
-      streamName,
+      streamId,
+      customStreamName,
       location,
       date,
-      weather,
-      waterCondition,
+      weatherConditionId,
+      waterConditionId,
       fishCaught,
-      species,
+      speciesId,
+      customSpecies,
       notes,
     } = req.body;
 
     // Validation
-    if (!streamName || !location || !date) {
+    if ((!streamId && !customStreamName) || !location || !date) {
       return res.status(400).json({ error: 'Stream name, location, and date are required' });
     }
 
@@ -30,19 +32,21 @@ router.post('/', async (req, res) => {
     // Insert experience
     const result = await pool.request()
       .input('userId', sql.Int, req.user.id)
-      .input('streamName', sql.VarChar, streamName)
+      .input('streamId', sql.Int, streamId || null)
+      .input('customStreamName', sql.VarChar, customStreamName || null)
       .input('location', sql.VarChar, location)
       .input('date', sql.Date, date)
-      .input('weather', sql.VarChar, weather || null)
-      .input('waterCondition', sql.VarChar, waterCondition || null)
+      .input('weatherConditionId', sql.Int, weatherConditionId || null)
+      .input('waterConditionId', sql.Int, waterConditionId || null)
       .input('fishCaught', sql.Int, fishCaught || 0)
-      .input('species', sql.VarChar, species || null)
+      .input('speciesId', sql.Int, speciesId || null)
+      .input('customSpecies', sql.VarChar, customSpecies || null)
       .input('notes', sql.Text, notes || null)
       .query(`
         INSERT INTO Experiences 
-        (userId, streamName, location, date, weather, waterCondition, fishCaught, species, notes, createdAt) 
+        (userId, streamId, customStreamName, location, date, weatherConditionId, waterConditionId, fishCaught, speciesId, customSpecies, notes, createdAt) 
         OUTPUT INSERTED.*
-        VALUES (@userId, @streamName, @location, @date, @weather, @waterCondition, @fishCaught, @species, @notes, GETDATE())
+        VALUES (@userId, @streamId, @customStreamName, @location, @date, @weatherConditionId, @waterConditionId, @fishCaught, @speciesId, @customSpecies, @notes, GETDATE())
       `);
 
     res.status(201).json({
@@ -63,9 +67,19 @@ router.get('/', async (req, res) => {
     const result = await pool.request()
       .input('userId', sql.Int, req.user.id)
       .query(`
-        SELECT * FROM Experiences 
-        WHERE userId = @userId 
-        ORDER BY date DESC, createdAt DESC
+        SELECT 
+          e.*,
+          s.name as streamName,
+          sp.name as speciesName,
+          wc.name as weatherCondition,
+          wtc.name as waterCondition
+        FROM Experiences e
+        LEFT JOIN Streams s ON e.streamId = s.id
+        LEFT JOIN Species sp ON e.speciesId = sp.id
+        LEFT JOIN WeatherConditions wc ON e.weatherConditionId = wc.id
+        LEFT JOIN WaterConditions wtc ON e.waterConditionId = wtc.id
+        WHERE e.userId = @userId 
+        ORDER BY e.date DESC, e.createdAt DESC
       `);
 
     res.json({
@@ -85,7 +99,20 @@ router.get('/:id', async (req, res) => {
     const result = await pool.request()
       .input('id', sql.Int, req.params.id)
       .input('userId', sql.Int, req.user.id)
-      .query('SELECT * FROM Experiences WHERE id = @id AND userId = @userId');
+      .query(`
+        SELECT 
+          e.*,
+          s.name as streamName,
+          sp.name as speciesName,
+          wc.name as weatherCondition,
+          wtc.name as waterCondition
+        FROM Experiences e
+        LEFT JOIN Streams s ON e.streamId = s.id
+        LEFT JOIN Species sp ON e.speciesId = sp.id
+        LEFT JOIN WeatherConditions wc ON e.weatherConditionId = wc.id
+        LEFT JOIN WaterConditions wtc ON e.waterConditionId = wtc.id
+        WHERE e.id = @id AND e.userId = @userId
+      `);
 
     if (result.recordset.length === 0) {
       return res.status(404).json({ error: 'Experience not found' });
@@ -104,13 +131,15 @@ router.get('/:id', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const {
-      streamName,
+      streamId,
+      customStreamName,
       location,
       date,
-      weather,
-      waterCondition,
+      weatherConditionId,
+      waterConditionId,
       fishCaught,
-      species,
+      speciesId,
+      customSpecies,
       notes,
     } = req.body;
 
@@ -129,23 +158,27 @@ router.put('/:id', async (req, res) => {
     // Update experience
     const result = await pool.request()
       .input('id', sql.Int, req.params.id)
-      .input('streamName', sql.VarChar, streamName)
+      .input('streamId', sql.Int, streamId || null)
+      .input('customStreamName', sql.VarChar, customStreamName || null)
       .input('location', sql.VarChar, location)
       .input('date', sql.Date, date)
-      .input('weather', sql.VarChar, weather || null)
-      .input('waterCondition', sql.VarChar, waterCondition || null)
+      .input('weatherConditionId', sql.Int, weatherConditionId || null)
+      .input('waterConditionId', sql.Int, waterConditionId || null)
       .input('fishCaught', sql.Int, fishCaught || 0)
-      .input('species', sql.VarChar, species || null)
+      .input('speciesId', sql.Int, speciesId || null)
+      .input('customSpecies', sql.VarChar, customSpecies || null)
       .input('notes', sql.Text, notes || null)
       .query(`
         UPDATE Experiences 
-        SET streamName = @streamName, 
+        SET streamId = @streamId,
+            customStreamName = @customStreamName,
             location = @location, 
             date = @date, 
-            weather = @weather, 
-            waterCondition = @waterCondition, 
+            weatherConditionId = @weatherConditionId, 
+            waterConditionId = @waterConditionId, 
             fishCaught = @fishCaught, 
-            species = @species, 
+            speciesId = @speciesId,
+            customSpecies = @customSpecies, 
             notes = @notes,
             updatedAt = GETDATE()
         OUTPUT INSERTED.*

@@ -82,17 +82,17 @@ const ExperienceList: React.FC = () => {
           <div className="experiences-grid">
             {experiences.map((exp) => (
               <div key={exp.id} className="experience-card">
-                <h3>{exp.streamName}</h3>
+                <h3>{exp.streamName || exp.customStreamName}</h3>
                 <p className="location">📍 {exp.location}</p>
                 <p className="date">📅 {new Date(exp.date).toLocaleDateString()}</p>
-                {exp.weather && <p className="weather">🌤️ {exp.weather}</p>}
+                {exp.weatherCondition && <p className="weather">🌤️ {exp.weatherCondition}</p>}
                 {exp.waterCondition && (
                   <p className="water-condition">💧 {exp.waterCondition}</p>
                 )}
                 {exp.fishCaught !== undefined && exp.fishCaught > 0 && (
                   <p className="fish-caught">🎣 {exp.fishCaught} fish caught</p>
                 )}
-                {exp.species && <p className="species">🐟 {exp.species}</p>}
+                {(exp.speciesName || exp.customSpecies) && <p className="species">🐟 {exp.speciesName || exp.customSpecies}</p>}
                 {exp.notes && <p className="notes">{exp.notes}</p>}
                 <div className="card-actions">
                   <button

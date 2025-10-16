@@ -11,28 +11,69 @@ export interface AuthResponse {
   user: User;
 }
 
+export interface Stream {
+  id: number;
+  name: string;
+  location?: string;
+  description?: string;
+}
+
+export interface Species {
+  id: number;
+  name: string;
+  scientificName?: string;
+  description?: string;
+}
+
+export interface WeatherCondition {
+  id: number;
+  name: string;
+  description?: string;
+}
+
+export interface WaterCondition {
+  id: number;
+  name: string;
+  description?: string;
+}
+
+export interface LookupData {
+  streams: Stream[];
+  species: Species[];
+  weatherConditions: WeatherCondition[];
+  waterConditions: WaterCondition[];
+}
+
 export interface Experience {
   id?: number;
   userId?: number;
-  streamName: string;
+  streamId?: number;
+  customStreamName?: string;
+  streamName?: string;
   location: string;
   date: string;
-  weather?: string;
+  weatherConditionId?: number;
+  weatherCondition?: string;
+  waterConditionId?: number;
   waterCondition?: string;
   fishCaught?: number;
-  species?: string;
+  speciesId?: number;
+  customSpecies?: string;
+  speciesName?: string;
   notes?: string;
   createdAt?: string;
   updatedAt?: string;
 }
 
 export interface ExperienceFormData {
-  streamName: string;
+  streamId?: number;
+  customStreamName?: string;
   location: string;
   date: string;
-  weather: string;
-  waterCondition: string;
+  weatherConditionId?: number;
+  waterConditionId?: number;
   fishCaught: number;
-  species: string;
+  speciesId?: number;
+  customSpecies?: string;
   notes: string;
 }
