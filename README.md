@@ -5,13 +5,15 @@ A web application for Trout Unlimited members to log their stream experiences.
 ## Features
 
 - **User Registration & Authentication**: Self-service user registration with secure JWT-based authentication
+- **Standardized Data Entry**: Lookup tables for streams, species, weather conditions, and water conditions ensure consistent data
 - **Stream Experience Logging**: Record detailed information about fishing trips including:
-  - Stream name and location
+  - Stream name (from lookup table or custom entry)
+  - Location
   - Date of visit
-  - Weather conditions
-  - Water conditions
+  - Weather conditions (standardized dropdown)
+  - Water conditions (standardized dropdown)
   - Number of fish caught
-  - Species of fish
+  - Species of fish (from lookup table or custom entry)
   - Additional notes
 - **Experience Management**: View, edit, and delete logged experiences
 - **Responsive Design**: Works seamlessly on desktop and mobile browsers
@@ -29,9 +31,12 @@ A web application for Trout Unlimited members to log their stream experiences.
 - **JWT** for authentication
 - **bcryptjs** for password hashing
 - **Azure SQL Database** for data persistence
+- RESTful API with lookup table endpoints
 
 ### Database
 - **Azure SQL Database** with T-SQL schema
+- Normalized design with lookup tables for data consistency
+- Pre-populated with common trout species and standard conditions
 
 ## Project Structure
 
@@ -159,6 +164,13 @@ tu-connect/
 ### Authentication
 - `POST /api/auth/register` - Register a new user
 - `POST /api/auth/login` - Login and receive JWT token
+
+### Lookup Data
+- `GET /api/lookups/all` - Get all lookup data (streams, species, weather, water conditions)
+- `GET /api/lookups/streams` - Get all streams
+- `GET /api/lookups/species` - Get all fish species
+- `GET /api/lookups/weather-conditions` - Get all weather conditions
+- `GET /api/lookups/water-conditions` - Get all water conditions
 
 ### Experiences (Protected)
 - `GET /api/experiences` - Get all experiences for logged-in user
