@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { AuthResponse, Experience, LookupData } from '../types';
+import { AuthResponse, Trip, LookupData } from '../types';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
 
@@ -64,36 +64,46 @@ export const lookupsAPI = {
     return response.data.weatherConditions;
   },
 
-  getWaterConditions: async () => {
-    const response = await api.get('/lookups/water-conditions');
-    return response.data.waterConditions;
+  getWaterClarityConditions: async () => {
+    const response = await api.get('/lookups/water-clarity-conditions');
+    return response.data.waterClarityConditions;
+  },
+
+  getWaterLevelConditions: async () => {
+    const response = await api.get('/lookups/water-level-conditions');
+    return response.data.waterLevelConditions;
+  },
+
+  getWaterFlowConditions: async () => {
+    const response = await api.get('/lookups/water-flow-conditions');
+    return response.data.waterFlowConditions;
   },
 };
 
-// Experiences API
-export const experiencesAPI = {
-  getAll: async (): Promise<Experience[]> => {
-    const response = await api.get('/experiences');
-    return response.data.experiences;
+// Trips API
+export const tripsAPI = {
+  getAll: async (): Promise<Trip[]> => {
+    const response = await api.get('/trips');
+    return response.data.trips;
   },
 
-  getById: async (id: number): Promise<Experience> => {
-    const response = await api.get(`/experiences/${id}`);
-    return response.data.experience;
+  getById: async (id: number): Promise<Trip> => {
+    const response = await api.get(`/trips/${id}`);
+    return response.data.trip;
   },
 
-  create: async (experience: Partial<Experience>): Promise<Experience> => {
-    const response = await api.post('/experiences', experience);
-    return response.data.experience;
+  create: async (trip: Partial<Trip>): Promise<Trip> => {
+    const response = await api.post('/trips', trip);
+    return response.data.trip;
   },
 
-  update: async (id: number, experience: Partial<Experience>): Promise<Experience> => {
-    const response = await api.put(`/experiences/${id}`, experience);
-    return response.data.experience;
+  update: async (id: number, trip: Partial<Trip>): Promise<Trip> => {
+    const response = await api.put(`/trips/${id}`, trip);
+    return response.data.trip;
   },
 
   delete: async (id: number): Promise<void> => {
-    await api.delete(`/experiences/${id}`);
+    await api.delete(`/trips/${id}`);
   },
 };
 

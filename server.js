@@ -3,7 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const authRoutes = require('./backend/routes/auth');
-const experiencesRoutes = require('./backend/routes/experiences');
+const tripsRoutes = require('./backend/routes/trips');
 const lookupsRoutes = require('./backend/routes/lookups');
 
 const app = express();
@@ -16,7 +16,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 // Routes
 app.use('/api/auth', authRoutes);
-app.use('/api/experiences', experiencesRoutes);
+app.use('/api/trips', tripsRoutes);
 app.use('/api/lookups', lookupsRoutes);
 
 // Health check endpoint

@@ -45,8 +45,8 @@ CREATE TABLE WeatherConditions (
     updatedAt DATETIME2 NULL
 );
 
--- Water conditions lookup table
-CREATE TABLE WaterConditions (
+-- Water clarity conditions lookup table
+CREATE TABLE WaterClarityConditions (
     id INT IDENTITY(1,1) PRIMARY KEY,
     name VARCHAR(100) NOT NULL UNIQUE,
     description TEXT NULL,
@@ -55,41 +55,74 @@ CREATE TABLE WaterConditions (
     updatedAt DATETIME2 NULL
 );
 
--- Create Experiences table with foreign keys to lookup tables
-CREATE TABLE Experiences (
+-- Water level conditions lookup table
+CREATE TABLE WaterLevelConditions (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    description TEXT NULL,
+    isActive BIT NOT NULL DEFAULT 1,
+    createdAt DATETIME2 NOT NULL DEFAULT GETDATE(),
+    updatedAt DATETIME2 NULL
+);
+
+-- Water flow conditions lookup table
+CREATE TABLE WaterFlowConditions (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    description TEXT NULL,
+    isActive BIT NOT NULL DEFAULT 1,
+    createdAt DATETIME2 NOT NULL DEFAULT GETDATE(),
+    updatedAt DATETIME2 NULL
+);
+
+-- Create Trips table (renamed from Experiences)
+CREATE TABLE Trips (
     id INT IDENTITY(1,1) PRIMARY KEY,
     userId INT NOT NULL,
-    streamId INT NULL,
-    customStreamName VARCHAR(255) NULL,
-    location VARCHAR(255) NOT NULL,
+    streamId INT NOT NULL,
     date DATE NOT NULL,
+    startTime TIME NULL,
+    stopTime TIME NULL,
     weatherConditionId INT NULL,
-    waterConditionId INT NULL,
-    fishCaught INT DEFAULT 0,
-    speciesId INT NULL,
-    customSpecies VARCHAR(255) NULL,
+    waterClarityConditionId INT NULL,
+    waterLevelConditionId INT NULL,
+    waterFlowConditionId INT NULL,
     notes TEXT NULL,
     createdAt DATETIME2 NOT NULL DEFAULT GETDATE(),
     updatedAt DATETIME2 NULL,
-    CONSTRAINT FK_Experiences_Users FOREIGN KEY (userId) REFERENCES Users(id) ON DELETE CASCADE,
-    CONSTRAINT FK_Experiences_Streams FOREIGN KEY (streamId) REFERENCES Streams(id),
-    CONSTRAINT FK_Experiences_WeatherConditions FOREIGN KEY (weatherConditionId) REFERENCES WeatherConditions(id),
-    CONSTRAINT FK_Experiences_WaterConditions FOREIGN KEY (waterConditionId) REFERENCES WaterConditions(id),
-    CONSTRAINT FK_Experiences_Species FOREIGN KEY (speciesId) REFERENCES Species(id),
-    -- Ensure either streamId or customStreamName is provided
-    CONSTRAINT CK_Experiences_StreamName CHECK (streamId IS NOT NULL OR customStreamName IS NOT NULL),
-    -- Ensure either speciesId or customSpecies is provided if fish were caught
-    CONSTRAINT CK_Experiences_Species CHECK (fishCaught = 0 OR speciesId IS NOT NULL OR customSpecies IS NOT NULL)
+    CONSTRAINT FK_Trips_Users FOREIGN KEY (userId) REFERENCES Users(id) ON DELETE CASCADE,
+    CONSTRAINT FK_Trips_Streams FOREIGN KEY (streamId) REFERENCES Streams(id),
+    CONSTRAINT FK_Trips_WeatherConditions FOREIGN KEY (weatherConditionId) REFERENCES WeatherConditions(id),
+    CONSTRAINT FK_Trips_WaterClarityConditions FOREIGN KEY (waterClarityConditionId) REFERENCES WaterClarityConditions(id),
+    CONSTRAINT FK_Trips_WaterLevelConditions FOREIGN KEY (waterLevelConditionId) REFERENCES WaterLevelConditions(id),
+    CONSTRAINT FK_Trips_WaterFlowConditions FOREIGN KEY (waterFlowConditionId) REFERENCES WaterFlowConditions(id)
+);
+
+-- Create Catches table (multiple catches per trip)
+CREATE TABLE Catches (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    tripId INT NOT NULL,
+    speciesId INT NOT NULL,
+    quantity INT NOT NULL DEFAULT 1,
+    notes TEXT NULL,
+    createdAt DATETIME2 NOT NULL DEFAULT GETDATE(),
+    updatedAt DATETIME2 NULL,
+    CONSTRAINT FK_Catches_Trips FOREIGN KEY (tripId) REFERENCES Trips(id) ON DELETE CASCADE,
+    CONSTRAINT FK_Catches_Species FOREIGN KEY (speciesId) REFERENCES Species(id),
+    CONSTRAINT CK_Catches_Quantity CHECK (quantity > 0)
 );
 
 -- Create indexes for better query performance
 CREATE INDEX IX_Users_Email ON Users(email);
-CREATE INDEX IX_Experiences_UserId ON Experiences(userId);
-CREATE INDEX IX_Experiences_Date ON Experiences(date DESC);
-CREATE INDEX IX_Experiences_StreamId ON Experiences(streamId);
-CREATE INDEX IX_Experiences_SpeciesId ON Experiences(speciesId);
-CREATE INDEX IX_Experiences_WeatherConditionId ON Experiences(weatherConditionId);
-CREATE INDEX IX_Experiences_WaterConditionId ON Experiences(waterConditionId);
+CREATE INDEX IX_Trips_UserId ON Trips(userId);
+CREATE INDEX IX_Trips_Date ON Trips(date DESC);
+CREATE INDEX IX_Trips_StreamId ON Trips(streamId);
+CREATE INDEX IX_Trips_WeatherConditionId ON Trips(weatherConditionId);
+CREATE INDEX IX_Trips_WaterClarityConditionId ON Trips(waterClarityConditionId);
+CREATE INDEX IX_Trips_WaterLevelConditionId ON Trips(waterLevelConditionId);
+CREATE INDEX IX_Trips_WaterFlowConditionId ON Trips(waterFlowConditionId);
+CREATE INDEX IX_Catches_TripId ON Catches(tripId);
+CREATE INDEX IX_Catches_SpeciesId ON Catches(speciesId);
 CREATE INDEX IX_Streams_Name ON Streams(name);
 CREATE INDEX IX_Species_Name ON Species(name);
 
@@ -102,14 +135,30 @@ INSERT INTO WeatherConditions (name, description) VALUES
 ('Stormy', 'Severe weather with thunder and lightning'),
 ('Foggy', 'Reduced visibility due to fog');
 
--- Insert default water conditions
-INSERT INTO WaterConditions (name, description) VALUES
+-- Insert default water clarity conditions
+INSERT INTO WaterClarityConditions (name, description) VALUES
 ('Clear', 'Water is clear with good visibility'),
 ('Slightly Murky', 'Some cloudiness in the water'),
 ('Murky', 'Poor water visibility'),
-('High Flow', 'Water level and flow rate above normal'),
-('Low Flow', 'Water level and flow rate below normal'),
-('Normal Flow', 'Typical water level and flow rate');
+('Very Murky', 'Very poor water visibility'),
+('Stained', 'Water has a tea-colored stain');
+
+-- Insert default water level conditions
+INSERT INTO WaterLevelConditions (name, description) VALUES
+('Very Low', 'Water level significantly below normal'),
+('Low', 'Water level below normal'),
+('Normal', 'Typical water level'),
+('High', 'Water level above normal'),
+('Very High', 'Water level significantly above normal'),
+('Flood Stage', 'Water at or near flood stage');
+
+-- Insert default water flow conditions
+INSERT INTO WaterFlowConditions (name, description) VALUES
+('Slow', 'Minimal current'),
+('Moderate', 'Normal flow rate'),
+('Fast', 'Strong current'),
+('Very Fast', 'Powerful current'),
+('Torrential', 'Dangerous flow conditions');
 
 -- Insert some common trout species
 INSERT INTO Species (name, scientificName, description) VALUES

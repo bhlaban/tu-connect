@@ -44,17 +44,45 @@ router.get('/weather-conditions', async (req, res) => {
   }
 });
 
-// Get all water conditions
-router.get('/water-conditions', async (req, res) => {
+// Get all water clarity conditions
+router.get('/water-clarity-conditions', async (req, res) => {
   try {
     const pool = await getConnection();
     const result = await pool.request()
-      .query('SELECT id, name, description FROM WaterConditions WHERE isActive = 1 ORDER BY name');
+      .query('SELECT id, name, description FROM WaterClarityConditions WHERE isActive = 1 ORDER BY name');
     
-    res.json({ waterConditions: result.recordset });
+    res.json({ waterClarityConditions: result.recordset });
   } catch (error) {
-    console.error('Error fetching water conditions:', error);
-    res.status(500).json({ error: 'Failed to fetch water conditions' });
+    console.error('Error fetching water clarity conditions:', error);
+    res.status(500).json({ error: 'Failed to fetch water clarity conditions' });
+  }
+});
+
+// Get all water level conditions
+router.get('/water-level-conditions', async (req, res) => {
+  try {
+    const pool = await getConnection();
+    const result = await pool.request()
+      .query('SELECT id, name, description FROM WaterLevelConditions WHERE isActive = 1 ORDER BY name');
+    
+    res.json({ waterLevelConditions: result.recordset });
+  } catch (error) {
+    console.error('Error fetching water level conditions:', error);
+    res.status(500).json({ error: 'Failed to fetch water level conditions' });
+  }
+});
+
+// Get all water flow conditions
+router.get('/water-flow-conditions', async (req, res) => {
+  try {
+    const pool = await getConnection();
+    const result = await pool.request()
+      .query('SELECT id, name, description FROM WaterFlowConditions WHERE isActive = 1 ORDER BY name');
+    
+    res.json({ waterFlowConditions: result.recordset });
+  } catch (error) {
+    console.error('Error fetching water flow conditions:', error);
+    res.status(500).json({ error: 'Failed to fetch water flow conditions' });
   }
 });
 
@@ -63,18 +91,22 @@ router.get('/all', async (req, res) => {
   try {
     const pool = await getConnection();
     
-    const [streams, species, weatherConditions, waterConditions] = await Promise.all([
+    const [streams, species, weatherConditions, waterClarityConditions, waterLevelConditions, waterFlowConditions] = await Promise.all([
       pool.request().query('SELECT id, name, location, description FROM Streams WHERE isActive = 1 ORDER BY name'),
       pool.request().query('SELECT id, name, scientificName, description FROM Species WHERE isActive = 1 ORDER BY name'),
       pool.request().query('SELECT id, name, description FROM WeatherConditions WHERE isActive = 1 ORDER BY name'),
-      pool.request().query('SELECT id, name, description FROM WaterConditions WHERE isActive = 1 ORDER BY name')
+      pool.request().query('SELECT id, name, description FROM WaterClarityConditions WHERE isActive = 1 ORDER BY name'),
+      pool.request().query('SELECT id, name, description FROM WaterLevelConditions WHERE isActive = 1 ORDER BY name'),
+      pool.request().query('SELECT id, name, description FROM WaterFlowConditions WHERE isActive = 1 ORDER BY name')
     ]);
     
     res.json({
       streams: streams.recordset,
       species: species.recordset,
       weatherConditions: weatherConditions.recordset,
-      waterConditions: waterConditions.recordset
+      waterClarityConditions: waterClarityConditions.recordset,
+      waterLevelConditions: waterLevelConditions.recordset,
+      waterFlowConditions: waterFlowConditions.recordset
     });
   } catch (error) {
     console.error('Error fetching lookup data:', error);

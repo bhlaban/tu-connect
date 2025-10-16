@@ -20,7 +20,7 @@ const Login: React.FC = () => {
     try {
       const response = await authAPI.login(email, password);
       login(response.token, response.user);
-      navigate('/experiences');
+      navigate('/trips');
     } catch (err: any) {
       setError(err.response?.data?.error || 'Login failed. Please try again.');
     } finally {

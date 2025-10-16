@@ -28,7 +28,7 @@ const Register: React.FC = () => {
     try {
       const response = await authAPI.register(email, password, firstName, lastName);
       login(response.token, response.user);
-      navigate('/experiences');
+      navigate('/trips');
     } catch (err: any) {
       setError(err.response?.data?.error || 'Registration failed. Please try again.');
     } finally {

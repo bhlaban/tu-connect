@@ -3,8 +3,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider } from './context/AuthContext';
 import Login from './components/Login';
 import Register from './components/Register';
-import ExperienceList from './components/ExperienceList';
-import ExperienceForm from './components/ExperienceForm';
+import TripList from './components/TripList';
+import TripForm from './components/TripForm';
 import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
 
@@ -17,29 +17,33 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route
-            path="/experiences"
+            path="/trips"
             element={
               <ProtectedRoute>
-                <ExperienceList />
+                <TripList />
               </ProtectedRoute>
             }
           />
           <Route
-            path="/experiences/new"
+            path="/trips/new"
             element={
               <ProtectedRoute>
-                <ExperienceForm />
+                <TripForm />
               </ProtectedRoute>
             }
           />
           <Route
-            path="/experiences/edit/:id"
+            path="/trips/edit/:id"
             element={
               <ProtectedRoute>
-                <ExperienceForm />
+                <TripForm />
               </ProtectedRoute>
             }
           />
+          {/* Redirect old experience routes to trips */}
+          <Route path="/experiences" element={<Navigate to="/trips" replace />} />
+          <Route path="/experiences/new" element={<Navigate to="/trips/new" replace />} />
+          <Route path="/experiences/edit/:id" element={<Navigate to="/trips/edit/:id" replace />} />
         </Routes>
       </Router>
     </AuthProvider>
