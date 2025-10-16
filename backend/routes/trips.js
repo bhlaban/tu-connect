@@ -11,13 +11,13 @@ router.post('/', async (req, res) => {
   try {
     const {
       streamId,
+      location,
       date,
       startTime,
       stopTime,
       weatherConditionId,
       waterClarityConditionId,
       waterLevelConditionId,
-      waterFlowConditionId,
       notes,
       catches, // Array of catch objects
     } = req.body;
@@ -38,34 +38,34 @@ router.post('/', async (req, res) => {
       const tripResult = await transaction.request()
         .input('userId', sql.Int, req.user.id)
         .input('streamId', sql.Int, streamId)
+        .input('location', sql.VarChar, location || null)
         .input('date', sql.Date, date)
         .input('startTime', sql.Time, startTime || null)
         .input('stopTime', sql.Time, stopTime || null)
         .input('weatherConditionId', sql.Int, weatherConditionId || null)
         .input('waterClarityConditionId', sql.Int, waterClarityConditionId || null)
         .input('waterLevelConditionId', sql.Int, waterLevelConditionId || null)
-        .input('waterFlowConditionId', sql.Int, waterFlowConditionId || null)
         .input('notes', sql.Text, notes || null)
         .query(`
           INSERT INTO Trips 
-          (userId, streamId, date, startTime, stopTime, weatherConditionId, waterClarityConditionId, waterLevelConditionId, waterFlowConditionId, notes, createdAt) 
+          (userId, streamId, location, date, startTime, stopTime, weatherConditionId, waterClarityConditionId, waterLevelConditionId, notes, createdAt) 
           OUTPUT INSERTED.id, INSERTED.*
-          VALUES (@userId, @streamId, @date, @startTime, @stopTime, @weatherConditionId, @waterClarityConditionId, @waterLevelConditionId, @waterFlowConditionId, @notes, GETDATE())
+          VALUES (@userId, @streamId, @location, @date, @startTime, @stopTime, @weatherConditionId, @waterClarityConditionId, @waterLevelConditionId, @notes, GETDATE())
         `);
 
       const trip = tripResult.recordset[0];
 
-      // Insert catches if provided
+      // Insert catches if provided (each catch is unique, no quantity)
       if (catches && catches.length > 0) {
         for (const catchItem of catches) {
           await transaction.request()
             .input('tripId', sql.Int, trip.id)
             .input('speciesId', sql.Int, catchItem.speciesId)
-            .input('quantity', sql.Int, catchItem.quantity || 1)
+            .input('length', sql.Decimal(5, 2), catchItem.length || null)
             .input('notes', sql.Text, catchItem.notes || null)
             .query(`
-              INSERT INTO Catches (tripId, speciesId, quantity, notes, createdAt)
-              VALUES (@tripId, @speciesId, @quantity, @notes, GETDATE())
+              INSERT INTO Catches (tripId, speciesId, length, notes, createdAt)
+              VALUES (@tripId, @speciesId, @length, @notes, GETDATE())
             `);
         }
       }
@@ -97,17 +97,14 @@ router.get('/', async (req, res) => {
         SELECT 
           t.*,
           s.name as streamName,
-          s.location as streamLocation,
           wc.name as weatherCondition,
           wcl.name as waterClarityCondition,
-          wlc.name as waterLevelCondition,
-          wfc.name as waterFlowCondition
+          wlc.name as waterLevelCondition
         FROM Trips t
         INNER JOIN Streams s ON t.streamId = s.id
         LEFT JOIN WeatherConditions wc ON t.weatherConditionId = wc.id
         LEFT JOIN WaterClarityConditions wcl ON t.waterClarityConditionId = wcl.id
         LEFT JOIN WaterLevelConditions wlc ON t.waterLevelConditionId = wlc.id
-        LEFT JOIN WaterFlowConditions wfc ON t.waterFlowConditionId = wfc.id
         WHERE t.userId = @userId 
         ORDER BY t.date DESC, t.createdAt DESC
       `);
@@ -120,7 +117,7 @@ router.get('/', async (req, res) => {
         .query(`
           SELECT 
             c.id,
-            c.quantity,
+            c.length,
             c.notes,
             sp.id as speciesId,
             sp.name as speciesName,
@@ -154,17 +151,14 @@ router.get('/:id', async (req, res) => {
         SELECT 
           t.*,
           s.name as streamName,
-          s.location as streamLocation,
           wc.name as weatherCondition,
           wcl.name as waterClarityCondition,
-          wlc.name as waterLevelCondition,
-          wfc.name as waterFlowCondition
+          wlc.name as waterLevelCondition
         FROM Trips t
         INNER JOIN Streams s ON t.streamId = s.id
         LEFT JOIN WeatherConditions wc ON t.weatherConditionId = wc.id
         LEFT JOIN WaterClarityConditions wcl ON t.waterClarityConditionId = wcl.id
         LEFT JOIN WaterLevelConditions wlc ON t.waterLevelConditionId = wlc.id
-        LEFT JOIN WaterFlowConditions wfc ON t.waterFlowConditionId = wfc.id
         WHERE t.id = @id AND t.userId = @userId
       `);
 
@@ -180,7 +174,7 @@ router.get('/:id', async (req, res) => {
       .query(`
         SELECT 
           c.id,
-          c.quantity,
+          c.length,
           c.notes,
           sp.id as speciesId,
           sp.name as speciesName,
@@ -206,13 +200,13 @@ router.put('/:id', async (req, res) => {
   try {
     const {
       streamId,
+      location,
       date,
       startTime,
       stopTime,
       weatherConditionId,
       waterClarityConditionId,
       waterLevelConditionId,
-      waterFlowConditionId,
       notes,
       catches,
     } = req.body;
@@ -238,24 +232,24 @@ router.put('/:id', async (req, res) => {
       const result = await transaction.request()
         .input('id', sql.Int, req.params.id)
         .input('streamId', sql.Int, streamId)
+        .input('location', sql.VarChar, location || null)
         .input('date', sql.Date, date)
         .input('startTime', sql.Time, startTime || null)
         .input('stopTime', sql.Time, stopTime || null)
         .input('weatherConditionId', sql.Int, weatherConditionId || null)
         .input('waterClarityConditionId', sql.Int, waterClarityConditionId || null)
         .input('waterLevelConditionId', sql.Int, waterLevelConditionId || null)
-        .input('waterFlowConditionId', sql.Int, waterFlowConditionId || null)
         .input('notes', sql.Text, notes || null)
         .query(`
           UPDATE Trips 
           SET streamId = @streamId,
+              location = @location,
               date = @date,
               startTime = @startTime,
               stopTime = @stopTime,
               weatherConditionId = @weatherConditionId,
               waterClarityConditionId = @waterClarityConditionId,
               waterLevelConditionId = @waterLevelConditionId,
-              waterFlowConditionId = @waterFlowConditionId,
               notes = @notes,
               updatedAt = GETDATE()
           OUTPUT INSERTED.*
@@ -272,11 +266,11 @@ router.put('/:id', async (req, res) => {
           await transaction.request()
             .input('tripId', sql.Int, req.params.id)
             .input('speciesId', sql.Int, catchItem.speciesId)
-            .input('quantity', sql.Int, catchItem.quantity || 1)
+            .input('length', sql.Decimal(5, 2), catchItem.length || null)
             .input('notes', sql.Text, catchItem.notes || null)
             .query(`
-              INSERT INTO Catches (tripId, speciesId, quantity, notes, createdAt)
-              VALUES (@tripId, @speciesId, @quantity, @notes, GETDATE())
+              INSERT INTO Catches (tripId, speciesId, length, notes, createdAt)
+              VALUES (@tripId, @speciesId, @length, @notes, GETDATE())
             `);
         }
       }

@@ -73,11 +73,6 @@ export const lookupsAPI = {
     const response = await api.get('/lookups/water-level-conditions');
     return response.data.waterLevelConditions;
   },
-
-  getWaterFlowConditions: async () => {
-    const response = await api.get('/lookups/water-flow-conditions');
-    return response.data.waterFlowConditions;
-  },
 };
 
 // Trips API

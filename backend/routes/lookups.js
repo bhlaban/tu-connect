@@ -7,7 +7,7 @@ router.get('/streams', async (req, res) => {
   try {
     const pool = await getConnection();
     const result = await pool.request()
-      .query('SELECT id, name, location, description FROM Streams WHERE isActive = 1 ORDER BY name');
+      .query('SELECT id, name, description FROM Streams WHERE isActive = 1 ORDER BY name');
     
     res.json({ streams: result.recordset });
   } catch (error) {
@@ -72,32 +72,17 @@ router.get('/water-level-conditions', async (req, res) => {
   }
 });
 
-// Get all water flow conditions
-router.get('/water-flow-conditions', async (req, res) => {
-  try {
-    const pool = await getConnection();
-    const result = await pool.request()
-      .query('SELECT id, name, description FROM WaterFlowConditions WHERE isActive = 1 ORDER BY name');
-    
-    res.json({ waterFlowConditions: result.recordset });
-  } catch (error) {
-    console.error('Error fetching water flow conditions:', error);
-    res.status(500).json({ error: 'Failed to fetch water flow conditions' });
-  }
-});
-
 // Get all lookup data in one call
 router.get('/all', async (req, res) => {
   try {
     const pool = await getConnection();
     
-    const [streams, species, weatherConditions, waterClarityConditions, waterLevelConditions, waterFlowConditions] = await Promise.all([
-      pool.request().query('SELECT id, name, location, description FROM Streams WHERE isActive = 1 ORDER BY name'),
+    const [streams, species, weatherConditions, waterClarityConditions, waterLevelConditions] = await Promise.all([
+      pool.request().query('SELECT id, name, description FROM Streams WHERE isActive = 1 ORDER BY name'),
       pool.request().query('SELECT id, name, scientificName, description FROM Species WHERE isActive = 1 ORDER BY name'),
       pool.request().query('SELECT id, name, description FROM WeatherConditions WHERE isActive = 1 ORDER BY name'),
       pool.request().query('SELECT id, name, description FROM WaterClarityConditions WHERE isActive = 1 ORDER BY name'),
-      pool.request().query('SELECT id, name, description FROM WaterLevelConditions WHERE isActive = 1 ORDER BY name'),
-      pool.request().query('SELECT id, name, description FROM WaterFlowConditions WHERE isActive = 1 ORDER BY name')
+      pool.request().query('SELECT id, name, description FROM WaterLevelConditions WHERE isActive = 1 ORDER BY name')
     ]);
     
     res.json({
@@ -105,8 +90,7 @@ router.get('/all', async (req, res) => {
       species: species.recordset,
       weatherConditions: weatherConditions.recordset,
       waterClarityConditions: waterClarityConditions.recordset,
-      waterLevelConditions: waterLevelConditions.recordset,
-      waterFlowConditions: waterFlowConditions.recordset
+      waterLevelConditions: waterLevelConditions.recordset
     });
   } catch (error) {
     console.error('Error fetching lookup data:', error);

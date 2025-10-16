@@ -83,7 +83,7 @@ const TripList: React.FC = () => {
             {trips.map((trip) => (
               <div key={trip.id} className="trip-card">
                 <h3>{trip.streamName}</h3>
-                {trip.streamLocation && <p className="stream-location">📍 {trip.streamLocation}</p>}
+                {trip.location && <p className="trip-location">📍 {trip.location}</p>}
                 <p className="date">📅 {new Date(trip.date).toLocaleDateString()}</p>
                 {trip.startTime && trip.stopTime && (
                   <p className="time">⏰ {trip.startTime} - {trip.stopTime}</p>
@@ -95,16 +95,14 @@ const TripList: React.FC = () => {
                 {trip.waterLevelCondition && (
                   <p className="water-level">📊 Level: {trip.waterLevelCondition}</p>
                 )}
-                {trip.waterFlowCondition && (
-                  <p className="water-flow">🌊 Flow: {trip.waterFlowCondition}</p>
-                )}
                 {trip.catches && trip.catches.length > 0 && (
                   <div className="catches-section">
-                    <p className="catches-header">🎣 Catches:</p>
+                    <p className="catches-header">🎣 Catches ({trip.catches.length}):</p>
                     <ul className="catches-list">
                       {trip.catches.map((catchItem, index) => (
                         <li key={index}>
-                          {catchItem.quantity}x {catchItem.speciesName}
+                          {catchItem.speciesName}
+                          {catchItem.length && <span className="catch-length"> - {catchItem.length}"</span>}
                           {catchItem.notes && <span className="catch-notes"> - {catchItem.notes}</span>}
                         </li>
                       ))}

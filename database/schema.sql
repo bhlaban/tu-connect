@@ -17,7 +17,6 @@ CREATE TABLE Users (
 CREATE TABLE Streams (
     id INT IDENTITY(1,1) PRIMARY KEY,
     name VARCHAR(255) NOT NULL UNIQUE,
-    location VARCHAR(255) NULL,
     description TEXT NULL,
     isActive BIT NOT NULL DEFAULT 1,
     createdAt DATETIME2 NOT NULL DEFAULT GETDATE(),
@@ -65,28 +64,18 @@ CREATE TABLE WaterLevelConditions (
     updatedAt DATETIME2 NULL
 );
 
--- Water flow conditions lookup table
-CREATE TABLE WaterFlowConditions (
-    id INT IDENTITY(1,1) PRIMARY KEY,
-    name VARCHAR(100) NOT NULL UNIQUE,
-    description TEXT NULL,
-    isActive BIT NOT NULL DEFAULT 1,
-    createdAt DATETIME2 NOT NULL DEFAULT GETDATE(),
-    updatedAt DATETIME2 NULL
-);
-
 -- Create Trips table (renamed from Experiences)
 CREATE TABLE Trips (
     id INT IDENTITY(1,1) PRIMARY KEY,
     userId INT NOT NULL,
     streamId INT NOT NULL,
+    location VARCHAR(255) NULL,
     date DATE NOT NULL,
     startTime TIME NULL,
     stopTime TIME NULL,
     weatherConditionId INT NULL,
     waterClarityConditionId INT NULL,
     waterLevelConditionId INT NULL,
-    waterFlowConditionId INT NULL,
     notes TEXT NULL,
     createdAt DATETIME2 NOT NULL DEFAULT GETDATE(),
     updatedAt DATETIME2 NULL,
@@ -94,22 +83,20 @@ CREATE TABLE Trips (
     CONSTRAINT FK_Trips_Streams FOREIGN KEY (streamId) REFERENCES Streams(id),
     CONSTRAINT FK_Trips_WeatherConditions FOREIGN KEY (weatherConditionId) REFERENCES WeatherConditions(id),
     CONSTRAINT FK_Trips_WaterClarityConditions FOREIGN KEY (waterClarityConditionId) REFERENCES WaterClarityConditions(id),
-    CONSTRAINT FK_Trips_WaterLevelConditions FOREIGN KEY (waterLevelConditionId) REFERENCES WaterLevelConditions(id),
-    CONSTRAINT FK_Trips_WaterFlowConditions FOREIGN KEY (waterFlowConditionId) REFERENCES WaterFlowConditions(id)
+    CONSTRAINT FK_Trips_WaterLevelConditions FOREIGN KEY (waterLevelConditionId) REFERENCES WaterLevelConditions(id)
 );
 
--- Create Catches table (multiple catches per trip)
+-- Create Catches table (one catch per entry, no quantity)
 CREATE TABLE Catches (
     id INT IDENTITY(1,1) PRIMARY KEY,
     tripId INT NOT NULL,
     speciesId INT NOT NULL,
-    quantity INT NOT NULL DEFAULT 1,
+    length DECIMAL(5,2) NULL,
     notes TEXT NULL,
     createdAt DATETIME2 NOT NULL DEFAULT GETDATE(),
     updatedAt DATETIME2 NULL,
     CONSTRAINT FK_Catches_Trips FOREIGN KEY (tripId) REFERENCES Trips(id) ON DELETE CASCADE,
-    CONSTRAINT FK_Catches_Species FOREIGN KEY (speciesId) REFERENCES Species(id),
-    CONSTRAINT CK_Catches_Quantity CHECK (quantity > 0)
+    CONSTRAINT FK_Catches_Species FOREIGN KEY (speciesId) REFERENCES Species(id)
 );
 
 -- Create indexes for better query performance
@@ -120,7 +107,6 @@ CREATE INDEX IX_Trips_StreamId ON Trips(streamId);
 CREATE INDEX IX_Trips_WeatherConditionId ON Trips(weatherConditionId);
 CREATE INDEX IX_Trips_WaterClarityConditionId ON Trips(waterClarityConditionId);
 CREATE INDEX IX_Trips_WaterLevelConditionId ON Trips(waterLevelConditionId);
-CREATE INDEX IX_Trips_WaterFlowConditionId ON Trips(waterFlowConditionId);
 CREATE INDEX IX_Catches_TripId ON Catches(tripId);
 CREATE INDEX IX_Catches_SpeciesId ON Catches(speciesId);
 CREATE INDEX IX_Streams_Name ON Streams(name);
@@ -151,14 +137,6 @@ INSERT INTO WaterLevelConditions (name, description) VALUES
 ('High', 'Water level above normal'),
 ('Very High', 'Water level significantly above normal'),
 ('Flood Stage', 'Water at or near flood stage');
-
--- Insert default water flow conditions
-INSERT INTO WaterFlowConditions (name, description) VALUES
-('Slow', 'Minimal current'),
-('Moderate', 'Normal flow rate'),
-('Fast', 'Strong current'),
-('Very Fast', 'Powerful current'),
-('Torrential', 'Dangerous flow conditions');
 
 -- Insert some common trout species
 INSERT INTO Species (name, scientificName, description) VALUES

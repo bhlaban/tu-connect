@@ -14,7 +14,6 @@ export interface AuthResponse {
 export interface Stream {
   id: number;
   name: string;
-  location?: string;
   description?: string;
 }
 
@@ -43,19 +42,12 @@ export interface WaterLevelCondition {
   description?: string;
 }
 
-export interface WaterFlowCondition {
-  id: number;
-  name: string;
-  description?: string;
-}
-
 export interface LookupData {
   streams: Stream[];
   species: Species[];
   weatherConditions: WeatherCondition[];
   waterClarityConditions: WaterClarityCondition[];
   waterLevelConditions: WaterLevelCondition[];
-  waterFlowConditions: WaterFlowCondition[];
 }
 
 export interface Catch {
@@ -63,7 +55,7 @@ export interface Catch {
   speciesId: number;
   speciesName?: string;
   scientificName?: string;
-  quantity: number;
+  length?: number;
   notes?: string;
 }
 
@@ -72,7 +64,7 @@ export interface Trip {
   userId?: number;
   streamId: number;
   streamName?: string;
-  streamLocation?: string;
+  location?: string;
   date: string;
   startTime?: string;
   stopTime?: string;
@@ -82,8 +74,6 @@ export interface Trip {
   waterClarityCondition?: string;
   waterLevelConditionId?: number;
   waterLevelCondition?: string;
-  waterFlowConditionId?: number;
-  waterFlowCondition?: string;
   notes?: string;
   catches?: Catch[];
   createdAt?: string;
@@ -92,13 +82,13 @@ export interface Trip {
 
 export interface TripFormData {
   streamId: number;
+  location?: string;
   date: string;
   startTime?: string;
   stopTime?: string;
   weatherConditionId?: number;
   waterClarityConditionId?: number;
   waterLevelConditionId?: number;
-  waterFlowConditionId?: number;
   notes: string;
   catches: Catch[];
 }

@@ -11,13 +11,13 @@ const TripForm: React.FC = () => {
 
   const [formData, setFormData] = useState<TripFormData>({
     streamId: 0,
+    location: '',
     date: new Date().toISOString().split('T')[0],
     startTime: '',
     stopTime: '',
     weatherConditionId: undefined,
     waterClarityConditionId: undefined,
     waterLevelConditionId: undefined,
-    waterFlowConditionId: undefined,
     notes: '',
     catches: [],
   });
@@ -29,7 +29,6 @@ const TripForm: React.FC = () => {
     weatherConditions: [],
     waterClarityConditions: [],
     waterLevelConditions: [],
-    waterFlowConditions: [],
   });
 
   useEffect(() => {
@@ -52,13 +51,13 @@ const TripForm: React.FC = () => {
         const trip = await tripsAPI.getById(parseInt(id!));
         setFormData({
           streamId: trip.streamId,
+          location: trip.location || '',
           date: trip.date.split('T')[0],
           startTime: trip.startTime || '',
           stopTime: trip.stopTime || '',
           weatherConditionId: trip.weatherConditionId,
           waterClarityConditionId: trip.waterClarityConditionId,
           waterLevelConditionId: trip.waterLevelConditionId,
-          waterFlowConditionId: trip.waterFlowConditionId,
           notes: trip.notes || '',
           catches: trip.catches || [],
         });
@@ -81,7 +80,7 @@ const TripForm: React.FC = () => {
     setFormData((prev) => ({
       ...prev,
       [name]: name === 'streamId' || name === 'weatherConditionId' || name === 'waterClarityConditionId' ||
-               name === 'waterLevelConditionId' || name === 'waterFlowConditionId'
+               name === 'waterLevelConditionId'
         ? (value ? parseInt(value) : undefined)
         : value,
     }));
@@ -90,7 +89,7 @@ const TripForm: React.FC = () => {
   const handleAddCatch = () => {
     setFormData((prev) => ({
       ...prev,
-      catches: [...prev.catches, { speciesId: 0, quantity: 1, notes: '' }],
+      catches: [...prev.catches, { speciesId: 0, length: undefined, notes: '' }],
     }));
   };
 
@@ -106,7 +105,8 @@ const TripForm: React.FC = () => {
       const newCatches = [...prev.catches];
       newCatches[index] = {
         ...newCatches[index],
-        [field]: field === 'speciesId' || field === 'quantity' ? parseInt(value) || 0 : value,
+        [field]: field === 'speciesId' ? parseInt(value) || 0 : 
+                 field === 'length' ? (value ? parseFloat(value) : undefined) : value,
       };
       return { ...prev, catches: newCatches };
     });
@@ -123,7 +123,7 @@ const TripForm: React.FC = () => {
     }
 
     // Filter out invalid catches
-    const validCatches = formData.catches.filter(c => c.speciesId > 0 && c.quantity > 0);
+    const validCatches = formData.catches.filter(c => c.speciesId > 0);
 
     setLoading(true);
 
@@ -171,10 +171,23 @@ const TripForm: React.FC = () => {
             <option value="">Select a stream...</option>
             {lookupData.streams.map((stream) => (
               <option key={stream.id} value={stream.id}>
-                {stream.name} {stream.location ? `(${stream.location})` : ''}
+                {stream.name}
               </option>
             ))}
           </select>
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="location">Location on Stream</label>
+          <input
+            type="text"
+            id="location"
+            name="location"
+            value={formData.location}
+            onChange={handleChange}
+            disabled={loading}
+            placeholder="e.g., upstream of HWY T bridge"
+          />
         </div>
 
         <div className="form-group">
@@ -270,24 +283,6 @@ const TripForm: React.FC = () => {
           </select>
         </div>
 
-        <div className="form-group">
-          <label htmlFor="waterFlowConditionId">Water Flow</label>
-          <select
-            id="waterFlowConditionId"
-            name="waterFlowConditionId"
-            value={formData.waterFlowConditionId || ''}
-            onChange={handleChange}
-            disabled={loading}
-          >
-            <option value="">Select flow...</option>
-            {lookupData.waterFlowConditions.map((condition) => (
-              <option key={condition.id} value={condition.id}>
-                {condition.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
         <div className="catches-section">
           <div className="catches-header">
             <h3>Catches</h3>
@@ -327,15 +322,16 @@ const TripForm: React.FC = () => {
                     </div>
 
                     <div className="form-group">
-                      <label htmlFor={`quantity-${index}`}>Quantity *</label>
+                      <label htmlFor={`length-${index}`}>Length (inches)</label>
                       <input
                         type="number"
-                        id={`quantity-${index}`}
-                        value={catchItem.quantity}
-                        onChange={(e) => handleCatchChange(index, 'quantity', e.target.value)}
-                        min="1"
-                        required
+                        step="0.5"
+                        id={`length-${index}`}
+                        value={catchItem.length || ''}
+                        onChange={(e) => handleCatchChange(index, 'length', e.target.value)}
+                        min="0"
                         disabled={loading}
+                        placeholder="Optional"
                       />
                     </div>
 
