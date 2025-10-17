@@ -18,7 +18,6 @@ CREATE TABLE Streams (
     id INT IDENTITY(1,1) PRIMARY KEY,
     name VARCHAR(255) NOT NULL UNIQUE,
     description TEXT NULL,
-    displayOrder INT NOT NULL DEFAULT 999,
     isActive BIT NOT NULL DEFAULT 1,
     createdAt DATETIME2 NOT NULL DEFAULT GETDATE(),
     updatedAt DATETIME2 NULL
@@ -148,3 +147,26 @@ INSERT INTO Species (name, scientificName, description, displayOrder) VALUES
 ('Cutthroat Trout', 'Oncorhynchus clarkii', 'Native western species with red markings', 4),
 ('Golden Trout', 'Oncorhynchus aguabonita', 'High-altitude California native', 5),
 ('Bull Trout', 'Salvelinus confluentus', 'Large char species', 6);
+
+-- Insert known trout streams in Wisconsin
+INSERT INTO Streams (name, description) VALUES
+('Bois Brule River', 'Premier trout stream in Douglas County, flows into Lake Superior'),
+('Kinnickinnic River', 'Class I trout stream in Pierce and St. Croix counties'),
+('Rush Creek', 'Spring-fed stream in Crawford County'),
+('West Fork Kickapoo River', 'Scenic spring creek in Vernon County'),
+('Willow Creek', 'Class I trout stream in Richland County'),
+('Timber Coulee Creek', 'Spring creek in Vernon County'),
+('Castle Rock Creek', 'High-quality spring creek in Grant County'),
+('Chaffee Creek', 'Driftless area stream in Vernon County'),
+('Kickapoo River', 'Major trout river in southwestern Wisconsin'),
+('Pine River', 'Wild river in Florence County'),
+('Wolf River', 'Major river system in northeastern Wisconsin'),
+('Oconto River', 'Class I trout water in Oconto County'),
+('Lawrence Creek', 'Class I trout stream in Marquette County'),
+('Mecan River', 'Spring-fed stream in Marquette County'),
+('White River', 'Class I trout stream in Waushara County'),
+('Plover River', 'Trout stream in Marathon County'),
+('Tomorrow River', 'Quality trout stream in Portage County'),
+('Waupaca River', 'Scenic trout stream in Waupaca County'),
+('Prairie River', 'Northern Wisconsin trout stream in Lincoln County'),
+('Popple River', 'Remote trout stream in Florence County');
