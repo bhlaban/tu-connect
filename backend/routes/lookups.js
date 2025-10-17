@@ -7,7 +7,7 @@ router.get('/streams', async (req, res) => {
   try {
     const pool = await getConnection();
     const result = await pool.request()
-      .query('SELECT id, name, description FROM Streams WHERE isActive = 1 ORDER BY name');
+      .query('SELECT id, name, description FROM Streams WHERE isActive = 1 ORDER BY displayOrder, name');
     
     res.json({ streams: result.recordset });
   } catch (error) {
@@ -21,7 +21,7 @@ router.get('/species', async (req, res) => {
   try {
     const pool = await getConnection();
     const result = await pool.request()
-      .query('SELECT id, name, scientificName, description FROM Species WHERE isActive = 1 ORDER BY name');
+      .query('SELECT id, name, scientificName, description FROM Species WHERE isActive = 1 ORDER BY displayOrder, name');
     
     res.json({ species: result.recordset });
   } catch (error) {
@@ -35,7 +35,7 @@ router.get('/weather-conditions', async (req, res) => {
   try {
     const pool = await getConnection();
     const result = await pool.request()
-      .query('SELECT id, name, description FROM WeatherConditions WHERE isActive = 1 ORDER BY name');
+      .query('SELECT id, name, description FROM WeatherConditions WHERE isActive = 1 ORDER BY displayOrder, name');
     
     res.json({ weatherConditions: result.recordset });
   } catch (error) {
@@ -49,7 +49,7 @@ router.get('/water-clarity-conditions', async (req, res) => {
   try {
     const pool = await getConnection();
     const result = await pool.request()
-      .query('SELECT id, name, description FROM WaterClarityConditions WHERE isActive = 1 ORDER BY name');
+      .query('SELECT id, name, description FROM WaterClarityConditions WHERE isActive = 1 ORDER BY displayOrder, name');
     
     res.json({ waterClarityConditions: result.recordset });
   } catch (error) {
@@ -63,7 +63,7 @@ router.get('/water-level-conditions', async (req, res) => {
   try {
     const pool = await getConnection();
     const result = await pool.request()
-      .query('SELECT id, name, description FROM WaterLevelConditions WHERE isActive = 1 ORDER BY name');
+      .query('SELECT id, name, description FROM WaterLevelConditions WHERE isActive = 1 ORDER BY displayOrder, name');
     
     res.json({ waterLevelConditions: result.recordset });
   } catch (error) {
@@ -78,11 +78,11 @@ router.get('/all', async (req, res) => {
     const pool = await getConnection();
     
     const [streams, species, weatherConditions, waterClarityConditions, waterLevelConditions] = await Promise.all([
-      pool.request().query('SELECT id, name, description FROM Streams WHERE isActive = 1 ORDER BY name'),
-      pool.request().query('SELECT id, name, scientificName, description FROM Species WHERE isActive = 1 ORDER BY name'),
-      pool.request().query('SELECT id, name, description FROM WeatherConditions WHERE isActive = 1 ORDER BY name'),
-      pool.request().query('SELECT id, name, description FROM WaterClarityConditions WHERE isActive = 1 ORDER BY name'),
-      pool.request().query('SELECT id, name, description FROM WaterLevelConditions WHERE isActive = 1 ORDER BY name')
+      pool.request().query('SELECT id, name, description FROM Streams WHERE isActive = 1 ORDER BY displayOrder, name'),
+      pool.request().query('SELECT id, name, scientificName, description FROM Species WHERE isActive = 1 ORDER BY displayOrder, name'),
+      pool.request().query('SELECT id, name, description FROM WeatherConditions WHERE isActive = 1 ORDER BY displayOrder, name'),
+      pool.request().query('SELECT id, name, description FROM WaterClarityConditions WHERE isActive = 1 ORDER BY displayOrder, name'),
+      pool.request().query('SELECT id, name, description FROM WaterLevelConditions WHERE isActive = 1 ORDER BY displayOrder, name')
     ]);
     
     res.json({
