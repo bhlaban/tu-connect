@@ -142,9 +142,9 @@ INSERT INTO WaterLevelConditions (name, description, displayOrder) VALUES
 
 -- Insert some common trout species
 INSERT INTO Species (name, scientificName, description, displayOrder) VALUES
-('Rainbow Trout', 'Oncorhynchus mykiss', 'Popular game fish with distinctive pink stripe', 1),
+('Brook Trout', 'Salvelinus fontinalis', 'Native to eastern North America', 1),
 ('Brown Trout', 'Salmo trutta', 'European species known for wariness', 2),
-('Brook Trout', 'Salvelinus fontinalis', 'Native to eastern North America', 3),
+('Rainbow Trout', 'Oncorhynchus mykiss', 'Popular game fish with distinctive pink stripe', 3),
 ('Cutthroat Trout', 'Oncorhynchus clarkii', 'Native western species with red markings', 4),
 ('Golden Trout', 'Oncorhynchus aguabonita', 'High-altitude California native', 5),
 ('Bull Trout', 'Salvelinus confluentus', 'Large char species', 6);
