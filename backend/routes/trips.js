@@ -27,9 +27,9 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ error: 'Stream and date are required' });
     }
 
-    // Convert empty strings to null for time fields
-    const validStartTime = startTime && startTime.trim() !== '' ? startTime : null;
-    const validStopTime = stopTime && stopTime.trim() !== '' ? stopTime : null;
+    // Convert empty strings to null for time fields and validate format
+    const validStartTime = startTime && typeof startTime === 'string' && startTime.trim() !== '' ? startTime.trim() : null;
+    const validStopTime = stopTime && typeof stopTime === 'string' && stopTime.trim() !== '' ? stopTime.trim() : null;
 
     const pool = await getConnection();
 
@@ -227,9 +227,9 @@ router.put('/:id', async (req, res) => {
       return res.status(404).json({ error: 'Trip not found' });
     }
 
-    // Convert empty strings to null for time fields
-    const validStartTime = startTime && startTime.trim() !== '' ? startTime : null;
-    const validStopTime = stopTime && stopTime.trim() !== '' ? stopTime : null;
+    // Convert empty strings to null for time fields and validate format
+    const validStartTime = startTime && typeof startTime === 'string' && startTime.trim() !== '' ? startTime.trim() : null;
+    const validStopTime = stopTime && typeof stopTime === 'string' && stopTime.trim() !== '' ? stopTime.trim() : null;
 
     // Start a transaction
     const transaction = pool.transaction();

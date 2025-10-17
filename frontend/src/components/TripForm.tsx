@@ -143,8 +143,11 @@ const TripForm: React.FC = () => {
     setLoading(true);
 
     try {
+      // Prepare submit data with proper time field handling
       const submitData = {
         ...formData,
+        startTime: formData.startTime?.trim() || '',
+        stopTime: formData.stopTime?.trim() || '',
         catches: validCatches,
       };
 
