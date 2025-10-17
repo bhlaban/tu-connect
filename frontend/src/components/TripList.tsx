@@ -84,7 +84,7 @@ const TripList: React.FC = () => {
               <div key={trip.id} className="trip-card">
                 <h3>{trip.streamName}</h3>
                 {trip.location && <p className="trip-location">📍 {trip.location}</p>}
-                <p className="date">📅 {new Date(trip.date).toLocaleDateString()}</p>
+                <p className="date">📅 {trip.date.split('T')[0]}</p>
                 {trip.startTime && trip.stopTime && (
                   <p className="time">⏰ {trip.startTime} - {trip.stopTime}</p>
                 )}

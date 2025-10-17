@@ -49,12 +49,27 @@ const TripForm: React.FC = () => {
       try {
         setLoading(true);
         const trip = await tripsAPI.getById(parseInt(id!));
+        
+        // Format time values for HTML time input (HH:MM format)
+        const formatTime = (timeValue: string | undefined): string => {
+          if (!timeValue) return '';
+          // Handle various time formats from SQL Server
+          // Format: HH:MM:SS or HH:MM:SS.mmm or just HH:MM
+          const timeParts = timeValue.split(':');
+          if (timeParts.length >= 2) {
+            const hours = timeParts[0].padStart(2, '0');
+            const minutes = timeParts[1].padStart(2, '0');
+            return `${hours}:${minutes}`;
+          }
+          return '';
+        };
+        
         setFormData({
           streamId: trip.streamId,
           location: trip.location || '',
           date: trip.date.split('T')[0],
-          startTime: trip.startTime || '',
-          stopTime: trip.stopTime || '',
+          startTime: formatTime(trip.startTime),
+          stopTime: formatTime(trip.stopTime),
           weatherConditionId: trip.weatherConditionId,
           waterClarityConditionId: trip.waterClarityConditionId,
           waterLevelConditionId: trip.waterLevelConditionId,
