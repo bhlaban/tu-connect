@@ -48,7 +48,7 @@ Copy the example environment file and update with your settings:
 
 ```bash
 # Create .env file in the backend directory
-cp .env.example backend/.env
+cp backend/.env.example backend/.env
 ```
 
 Edit `backend/.env` and update these values:

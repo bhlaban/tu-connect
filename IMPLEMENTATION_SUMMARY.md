@@ -146,10 +146,10 @@ tu-connect/
 │   │   ├── trips.js            # Trip endpoints
 │   │   └── lookups.js          # Lookup endpoints
 │   ├── server.js                # Express server entry point
-│   └── package.json             # Backend dependencies
+│   ├── package.json             # Backend dependencies
+│   └── .env.example             # Environment variables template
 ├── database/
 │   └── schema.sql              # Database schema
-├── .env.example               # Environment variables template
 ├── .gitignore                 # Git ignore rules
 ├── README.md                  # Project documentation
 ├── DEPLOYMENT.md              # Azure deployment guide
@@ -236,7 +236,7 @@ To use this application:
    - Run schema from `database/schema.sql`
 
 2. **Configure Environment**
-   - Copy `.env.example` to `backend/.env`
+   - Copy `backend/.env.example` to `backend/.env`
    - Add your Azure SQL credentials
    - Generate secure JWT secret
 

@@ -99,7 +99,7 @@ tu-connect/
 
 3. **Configure environment variables**
    
-   Copy `.env.example` to `backend/.env` and update with your Azure SQL Database credentials:
+   Copy `backend/.env.example` to `backend/.env` and update with your Azure SQL Database credentials:
    ```
    DB_SERVER=<your-server-name>.database.windows.net
    DB_DATABASE=tu-connect
