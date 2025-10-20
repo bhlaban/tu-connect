@@ -109,7 +109,7 @@ router.get('/', async (req, res) => {
         LEFT JOIN WaterClarityConditions wcl ON t.waterClarityConditionId = wcl.id
         LEFT JOIN WaterLevelConditions wlc ON t.waterLevelConditionId = wlc.id
         WHERE t.userId = @userId 
-        ORDER BY t.date DESC, t.createdAt DESC
+        ORDER BY t.startDateTime DESC, t.createdAt DESC
       `);
 
     // Get catches for each trip
@@ -205,8 +205,8 @@ router.put('/:id', async (req, res) => {
       streamId,
       location,
       date,
-      startTime,
-      stopTime,
+      startDateTime,
+      stopDateTime,
       weatherConditionId,
       waterClarityConditionId,
       waterLevelConditionId,

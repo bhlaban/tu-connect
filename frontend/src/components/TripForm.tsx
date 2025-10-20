@@ -67,9 +67,10 @@ const TripForm: React.FC = () => {
         setFormData({
           streamId: trip.streamId,
           location: trip.location || '',
-          date: trip.date.split('T')[0],
-          startTime: formatTime(trip.startTime),
-          stopTime: formatTime(trip.stopTime),
+          startDate: trip.startDateTime?.split('T')[0] || '',
+          stopDate: trip.stopDateTime?.split('T')[0] || '',
+          startTime: formatTime(trip.startDateTime?.split('T')[1]),
+          stopTime: formatTime(trip.stopDateTime?.split('T')[1]),
           weatherConditionId: trip.weatherConditionId,
           waterClarityConditionId: trip.waterClarityConditionId,
           waterLevelConditionId: trip.waterLevelConditionId,
