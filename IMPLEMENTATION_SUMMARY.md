@@ -136,10 +136,19 @@ tu-connect/
 │   │   │   └── index.ts       # TypeScript types
 │   │   └── App.tsx
 │   └── package.json
+├── backend/
+│   ├── config/
+│   │   └── database.js         # Database connection
+│   ├── middleware/
+│   │   └── auth.js             # JWT authentication
+│   ├── routes/
+│   │   ├── auth.js             # Auth endpoints
+│   │   ├── trips.js            # Trip endpoints
+│   │   └── lookups.js          # Lookup endpoints
+│   ├── server.js                # Express server entry point
+│   └── package.json             # Backend dependencies
 ├── database/
-│   └── schema.sql             # Database schema
-├── server.js                  # Express server entry point
-├── package.json               # Backend dependencies
+│   └── schema.sql              # Database schema
 ├── .env.example               # Environment variables template
 ├── .gitignore                 # Git ignore rules
 ├── README.md                  # Project documentation
@@ -227,19 +236,20 @@ To use this application:
    - Run schema from `database/schema.sql`
 
 2. **Configure Environment**
-   - Copy `.env.example` to `.env`
+   - Copy `.env.example` to `backend/.env`
    - Add your Azure SQL credentials
    - Generate secure JWT secret
 
 3. **Install Dependencies**
    ```bash
-   npm install
-   cd frontend && npm install
+   cd backend && npm install
+   cd ../frontend && npm install
    ```
 
 4. **Start Development Servers**
    ```bash
    # Terminal 1 - Backend
+   cd backend
    npm start
    
    # Terminal 2 - Frontend

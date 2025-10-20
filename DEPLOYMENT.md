@@ -66,7 +66,7 @@
 
 4. **Configure Startup Command:**
    - Go to "Configuration" > "General settings"
-   - Startup Command: `node server.js`
+   - Startup Command: `cd backend && node server.js`
 
 ### Option B: Using Azure CLI
 

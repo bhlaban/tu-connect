@@ -2,9 +2,9 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const authRoutes = require('./backend/routes/auth');
-const tripsRoutes = require('./backend/routes/trips');
-const lookupsRoutes = require('./backend/routes/lookups');
+const authRoutes = require('./routes/auth');
+const tripsRoutes = require('./routes/trips');
+const lookupsRoutes = require('./routes/lookups');
 
 const app = express();
 const PORT = process.env.PORT || 3001;

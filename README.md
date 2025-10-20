@@ -93,12 +93,13 @@ tu-connect/
 
 2. **Install backend dependencies**
    ```bash
+   cd backend
    npm install
    ```
 
 3. **Configure environment variables**
    
-   Copy `.env.example` to `.env` and update with your Azure SQL Database credentials:
+   Copy `.env.example` to `backend/.env` and update with your Azure SQL Database credentials:
    ```
    DB_SERVER=<your-server-name>.database.windows.net
    DB_DATABASE=tu-connect

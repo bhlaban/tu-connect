@@ -19,7 +19,9 @@ git clone <repository-url>
 cd tu-connect
 
 # Install backend dependencies
+cd backend
 npm install
+cd ..
 
 # Install frontend dependencies
 cd frontend
@@ -45,11 +47,11 @@ The schema creates two tables:
 Copy the example environment file and update with your settings:
 
 ```bash
-# Create .env file in the root directory
-cp .env.example .env
+# Create .env file in the backend directory
+cp .env.example backend/.env
 ```
 
-Edit `.env` and update these values:
+Edit `backend/.env` and update these values:
 ```
 DB_SERVER=<your-server-name>.database.windows.net
 DB_DATABASE=tu-connect
@@ -73,6 +75,7 @@ Open two terminal windows:
 **Terminal 1 - Backend API:**
 ```bash
 # From the root directory
+cd backend
 npm start
 ```
 
@@ -115,7 +118,7 @@ Once running, you can test the API at:
 ## Troubleshooting
 
 ### Backend won't start
-- Check that your `.env` file exists and has correct database credentials
+- Check that your `backend/.env` file exists and has correct database credentials
 - Verify your database server is accessible
 - Check firewall rules on Azure SQL Database
 
@@ -131,7 +134,7 @@ Once running, you can test the API at:
 
 ### Login/Registration not working
 - Check browser console for errors
-- Verify JWT_SECRET is set in `.env`
+- Verify JWT_SECRET is set in `backend/.env`
 - Check backend logs for error messages
 
 ## Development Tips
@@ -145,6 +148,7 @@ Both backend and frontend support hot reload:
 Install nodemon for automatic backend restarts:
 ```bash
 npm install -g nodemon
+cd backend
 nodemon server.js
 ```
 
