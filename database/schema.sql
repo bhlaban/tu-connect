@@ -74,9 +74,8 @@ CREATE TABLE Trips (
     userId INT NOT NULL,
     streamId INT NOT NULL,
     location VARCHAR(255) NULL,
-    date DATE NOT NULL,
-    startTime TIME NULL,
-    stopTime TIME NULL,
+    startDateTime DATETIME2 NULL,
+    stopDateTime DATETIME2 NULL,
     weatherConditionId INT NULL,
     waterClarityConditionId INT NULL,
     waterLevelConditionId INT NULL,
@@ -106,7 +105,7 @@ CREATE TABLE Catches (
 -- Create indexes for better query performance
 CREATE INDEX IX_Users_Email ON Users(email);
 CREATE INDEX IX_Trips_UserId ON Trips(userId);
-CREATE INDEX IX_Trips_Date ON Trips(date DESC);
+CREATE INDEX IX_Trips_StartDateTime ON Trips(startDateTime DESC);
 CREATE INDEX IX_Trips_StreamId ON Trips(streamId);
 CREATE INDEX IX_Trips_WeatherConditionId ON Trips(weatherConditionId);
 CREATE INDEX IX_Trips_WaterClarityConditionId ON Trips(waterClarityConditionId);

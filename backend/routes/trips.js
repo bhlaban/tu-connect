@@ -12,9 +12,8 @@ router.post('/', async (req, res) => {
     const {
       streamId,
       location,
-      date,
-      startTime,
-      stopTime,
+      startDateTime,
+      stopDateTime,
       weatherConditionId,
       waterClarityConditionId,
       waterLevelConditionId,
@@ -23,13 +22,13 @@ router.post('/', async (req, res) => {
     } = req.body;
 
     // Validation
-    if (!streamId || !date) {
-      return res.status(400).json({ error: 'Stream and date are required' });
+    if (!streamId) {
+      return res.status(400).json({ error: 'Stream is required' });
     }
 
-    // Convert empty strings to null for time fields and append seconds for SQL TIME format
-    const validStartTime = startTime && typeof startTime === 'string' && startTime.trim() !== '' ? startTime.trim() + ':00' : null;
-    const validStopTime = stopTime && typeof stopTime === 'string' && stopTime.trim() !== '' ? stopTime.trim() + ':00' : null;
+    // Convert empty strings to null for datetime fields
+    const validStartDateTime = startDateTime && typeof startDateTime === 'string' && startDateTime.trim() !== '' ? startDateTime.trim() : null;
+    const validStopDateTime = stopDateTime && typeof stopDateTime === 'string' && stopDateTime.trim() !== '' ? stopDateTime.trim() : null;
 
     const pool = await getConnection();
 

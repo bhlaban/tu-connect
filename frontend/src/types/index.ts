@@ -65,9 +65,8 @@ export interface Trip {
   streamId: number;
   streamName?: string;
   location?: string;
-  date: string;
-  startTime?: string;
-  stopTime?: string;
+  startDateTime?: string;
+  stopDateTime?: string;
   weatherConditionId?: number;
   weatherCondition?: string;
   waterClarityConditionId?: number;
@@ -83,9 +82,8 @@ export interface Trip {
 export interface TripFormData {
   streamId: number;
   location?: string;
-  date: string;
-  startTime?: string;
-  stopTime?: string;
+  startDateTime?: string;
+  stopDateTime?: string;
   weatherConditionId?: number;
   waterClarityConditionId?: number;
   waterLevelConditionId?: number;
