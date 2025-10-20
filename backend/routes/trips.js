@@ -227,8 +227,8 @@ router.put('/:id', async (req, res) => {
     }
 
     // Convert empty strings to null for time fields and append seconds for SQL TIME format
-    const validStartTime = startTime && typeof startTime === 'string' && startTime.trim() !== '' ? startTime.trim() + ':00' : null;
-    const validStopTime = stopTime && typeof stopTime === 'string' && stopTime.trim() !== '' ? stopTime.trim() + ':00' : null;
+    const validStartDateTime = startDateTime && typeof startDateTime === 'string' && startDateTime.trim() !== '' ? startDateTime.trim() : null;
+    const validStopDateTime = stopDateTime && typeof stopDateTime === 'string' && stopDateTime.trim() !== '' ? stopDateTime.trim() : null;
 
     // Start a transaction
     const transaction = pool.transaction();
