@@ -208,27 +208,42 @@ const TripForm: React.FC = () => {
           />
         </div>
 
-        <div className="form-group">
-          <label htmlFor="date">Date *</label>
-          <input
-            type="date"
-            id="date"
-            name="date"
-            value={formData.date}
-            onChange={handleChange}
-            required
-            disabled={loading}
-          />
-        </div>
-
         <div className="form-row">
           <div className="form-group">
-            <label htmlFor="startTime">Start Time</label>
+            <label htmlFor="startDate">Start Date *</label>
+            <input
+              type="date"
+              id="startDate"
+              name="startDate"
+              value={formData.startDate}
+              onChange={handleChange}
+              required
+              disabled={loading}
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="startTime">Start Time *</label>
             <input
               type="time"
               id="startTime"
               name="startTime"
               value={formData.startTime}
+              onChange={handleChange}
+              required
+              disabled={loading}
+            />
+          </div>
+        </div>
+
+        <div className="form-row">
+          <div className="form-group">
+            <label htmlFor="stopDate">Stop Date</label>
+            <input
+              type="date"
+              id="stopDate"
+              name="stopDate"
+              value={formData.stopDate}
               onChange={handleChange}
               disabled={loading}
             />

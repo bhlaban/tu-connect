@@ -84,9 +84,15 @@ const TripList: React.FC = () => {
               <div key={trip.id} className="trip-card">
                 <h3>{trip.streamName}</h3>
                 {trip.location && <p className="trip-location">📍 {trip.location}</p>}
-                <p className="date">📅 {trip.date.split('T')[0]}</p>
-                {trip.startTime && trip.stopTime && (
-                  <p className="time">⏰ {trip.startTime} - {trip.stopTime}</p>
+                {trip.startDateTime && (
+                  <p className="date">📅 {trip.startDateTime.split('T')[0]}</p>
+                )}
+                {trip.startDateTime && trip.stopDateTime && (
+                  <p className="time">
+                    ⏰ {trip.startDateTime.split('T')[1]?.substring(0, 5)} - {trip.stopDateTime.split('T')[1]?.substring(0, 5)}
+                    {trip.startDateTime.split('T')[0] !== trip.stopDateTime.split('T')[0] && 
+                      ` (${trip.stopDateTime.split('T')[0]})`}
+                  </p>
                 )}
                 {trip.weatherCondition && <p className="weather">🌤️ {trip.weatherCondition}</p>}
                 {trip.waterClarityCondition && (
