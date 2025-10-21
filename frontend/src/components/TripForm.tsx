@@ -145,11 +145,26 @@ const TripForm: React.FC = () => {
     setLoading(true);
 
     try {
-      // Prepare submit data with proper time field handling
+      // Combine date and time into datetime strings (no timezone conversion)
+      const startDateTime = formData.startDate && formData.startTime 
+        ? `${formData.startDate}T${formData.startTime}:00`
+        : formData.startDate 
+          ? `${formData.startDate}T00:00:00`
+          : '';
+
+      const stopDateTime = formData.stopDate && formData.stopTime
+        ? `${formData.stopDate}T${formData.stopTime}:00`
+        : '';
+
       const submitData = {
-        ...formData,
-        startTime: formData.startTime?.trim() || '',
-        stopTime: formData.stopTime?.trim() || '',
+        streamId: formData.streamId,
+        location: formData.location,
+        weatherConditionId: formData.weatherConditionId,
+        waterClarityConditionId: formData.waterClarityConditionId,
+        waterLevelConditionId: formData.waterLevelConditionId,
+        notes: formData.notes,
+        startDateTime,
+        stopDateTime,
         catches: validCatches,
       };
 

@@ -12,10 +12,8 @@ router.post('/', async (req, res) => {
     const {
       streamId,
       location,
-      startDate,
-      startTime,
-      stopDate,
-      stopTime,
+      startDateTime,
+      stopDateTime,
       weatherConditionId,
       waterClarityConditionId,
       waterLevelConditionId,
@@ -28,25 +26,21 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ error: 'Stream is required' });
     }
 
-    if (!startDate) {
-      return res.status(400).json({ error: 'Start date is required' });
-    }
-    
-    if (!startTime) {
-      return res.status(400).json({ error: 'Start time is required' });
+    if (!startDateTime) {
+      return res.status(400).json({ error: 'Start date/time is required' });
     }
 
-    if (!stopDate) {
-      return res.status(400).json({ error: 'Stop date is required' });
-    }
+    // Validate and process datetime values
+    const validStartDateTime = startDateTime && typeof startDateTime === 'string' && startDateTime.trim() !== '' 
+      ? startDateTime.trim() 
+      : null;
+    const validStopDateTime = stopDateTime && typeof stopDateTime === 'string' && stopDateTime.trim() !== '' 
+      ? stopDateTime.trim() 
+      : null;
 
-    if (!stopTime) {
-      return res.status(400).json({ error: 'Stop time is required' });
+    if (!validStartDateTime) {
+      return res.status(400).json({ error: 'Valid start date/time is required' });
     }
-
-    // Combine dates and times for SQL DATETIME format
-    const validStartDateTime = startDate + ' ' + startTime;
-    const validStopDateTime = stopDate + ' ' + stopTime;
 
     const pool = await getConnection();
 
@@ -221,16 +215,35 @@ router.put('/:id', async (req, res) => {
     const {
       streamId,
       location,
-      startDate,
-      startTime,
-      stopDate,
-      stopTime,
+      startDateTime,
+      stopDateTime,
       weatherConditionId,
       waterClarityConditionId,
       waterLevelConditionId,
       notes,
       catches,
     } = req.body;
+
+    // Validation
+    if (!streamId) {
+      return res.status(400).json({ error: 'Stream is required' });
+    }
+
+    if (!startDateTime) {
+      return res.status(400).json({ error: 'Start date/time is required' });
+    }
+
+    // Validate and process datetime values
+    const validStartDateTime = startDateTime && typeof startDateTime === 'string' && startDateTime.trim() !== '' 
+      ? startDateTime.trim() 
+      : null;
+    const validStopDateTime = stopDateTime && typeof stopDateTime === 'string' && stopDateTime.trim() !== '' 
+      ? stopDateTime.trim() 
+      : null;
+
+    if (!validStartDateTime) {
+      return res.status(400).json({ error: 'Valid start date/time is required' });
+    }
 
     const pool = await getConnection();
 
@@ -244,10 +257,6 @@ router.put('/:id', async (req, res) => {
       return res.status(404).json({ error: 'Trip not found' });
     }
 
-    // Combine dates and times for SQL DATETIME format
-    const validStartDateTime = startDate + ' ' + startTime;
-    const validStopDateTime = stopDate + ' ' + stopTime;
-
     // Start a transaction
     const transaction = pool.transaction();
     await transaction.begin();
@@ -258,8 +267,8 @@ router.put('/:id', async (req, res) => {
         .input('id', sql.Int, req.params.id)
         .input('streamId', sql.Int, streamId)
         .input('location', sql.VarChar, location || null)
-        .input('startDateTime', sql.DateTime, validStartDateTime)
-        .input('stopDateTime', sql.DateTime, validStopDateTime)
+        .input('startDateTime', sql.DateTime2, validStartDateTime)
+        .input('stopDateTime', sql.DateTime2, validStopDateTime)
         .input('weatherConditionId', sql.Int, weatherConditionId || null)
         .input('waterClarityConditionId', sql.Int, waterClarityConditionId || null)
         .input('waterLevelConditionId', sql.Int, waterLevelConditionId || null)
