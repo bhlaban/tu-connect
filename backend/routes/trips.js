@@ -105,7 +105,7 @@ router.post('/', async (req, res) => {
         .query(`
           INSERT INTO Trips 
           (userId, streamId, location, startDateTime, stopDateTime, weatherConditionId, waterClarityConditionId, waterLevelConditionId, notes, createdAt) 
-          OUTPUT INSERTED.id, INSERTED.*
+          OUTPUT INSERTED.*
           VALUES (@userId, @streamId, @location, @startDateTime, @stopDateTime, @weatherConditionId, @waterClarityConditionId, @waterLevelConditionId, @notes, GETDATE())
         `);
 
