@@ -40,10 +40,6 @@ function App() {
               </ProtectedRoute>
             }
           />
-          {/* Redirect old experience routes to trips */}
-          <Route path="/experiences" element={<Navigate to="/trips" replace />} />
-          <Route path="/experiences/new" element={<Navigate to="/trips/new" replace />} />
-          <Route path="/experiences/edit/:id" element={<Navigate to="/trips/edit/:id" replace />} />
         </Routes>
       </Router>
     </AuthProvider>

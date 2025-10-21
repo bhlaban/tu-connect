@@ -1,21 +1,25 @@
 # TU Connect
 
-A web application for Trout Unlimited members to log their stream experiences.
+A web application for Trout Unlimited members to log their fishing trips.
 
 ## Features
 
 - **User Registration & Authentication**: Self-service user registration with secure JWT-based authentication
-- **Standardized Data Entry**: Lookup tables for streams, species, weather conditions, and water conditions ensure consistent data
-- **Stream Experience Logging**: Record detailed information about fishing trips including:
-  - Stream name (from lookup table or custom entry)
+- **Standardized Data Entry**: Lookup tables for streams, species, weather, water clarity, and water level ensure consistent data
+- **Fishing Trip Logging**: Record detailed information about fishing trips including:
+  - Stream (standardized dropdown)
   - Location
-  - Date of visit
-  - Weather conditions (standardized dropdown)
-  - Water conditions (standardized dropdown)
-  - Number of fish caught
-  - Species of fish (from lookup table or custom entry)
-  - Additional notes
-- **Experience Management**: View, edit, and delete logged experiences
+  - Start Date/Time
+  - Stop Date/Time
+  - Weather (standardized dropdown)
+  - Water Clarity (standardized dropdown)
+  - Water Level (standardized dropdown)
+  - Additional Notes
+  - Catches
+    - Species (standardized dropdown)
+    - Length
+    - Notes
+- **Fishing Trip Management**: View, edit, and delete fishing trips
 - **Responsive Design**: Works seamlessly on desktop and mobile browsers
 
 ## Technology Stack
@@ -42,14 +46,18 @@ A web application for Trout Unlimited members to log their stream experiences.
 
 ```
 tu-connect/
+├── .github/
+│   └── tu-connect-api.yml        # GitHub Action for deploying API
 ├── backend/
 │   ├── config/
-│   │   └── database.js          # Database configuration
+│   │   └── database.js           # Database configuration
 │   ├── middleware/
 │   │   └── auth.js               # JWT authentication middleware
-│   └── routes/
-│       ├── auth.js               # Authentication routes (register, login)
-│       └── experiences.js        # Experience CRUD routes
+│   ├── routes/
+│   │   ├── auth.js               # Authentication routes (register, login)
+│   │   ├── lookup.js             # Lookup routes (streams, species, weather-conditions, water-clarity-conditions, water-level-conditions, all)
+│   │   └── trips.js              # Trip CRUD routes (get, post, put, delete)
+│   ├─ server.js                  # Express server entry point
 ├── database/
 │   └── schema.sql                # Database schema for Azure SQL
 ├── frontend/
@@ -57,10 +65,10 @@ tu-connect/
 │   └── src/
 │       ├── components/
 │       │   ├── Login.tsx
-│       │   ├── Register.tsx
-│       │   ├── ExperienceList.tsx
-│       │   ├── ExperienceForm.tsx
 │       │   ├── ProtectedRoute.tsx
+│       │   ├── Register.tsx
+│       │   ├── TripList.tsx
+│       │   ├── TripForm.tsx
 │       │   └── *.css
 │       ├── context/
 │       │   └── AuthContext.tsx   # Authentication state management
@@ -70,8 +78,6 @@ tu-connect/
 │       │   └── index.ts          # TypeScript types
 │       ├── App.tsx
 │       └── index.tsx
-├── server.js                     # Express server entry point
-├── package.json
 └── README.md
 ```
 
@@ -86,13 +92,13 @@ tu-connect/
 ### Backend Setup
 
 1. **Clone the repository**
-   ```bash
+   ```powershell
    git clone <repository-url>
    cd tu-connect
    ```
 
 2. **Install backend dependencies**
-   ```bash
+   ```powershell
    cd backend
    npm install
    ```
@@ -120,7 +126,7 @@ tu-connect/
    ```
 
 5. **Start the backend server**
-   ```bash
+   ```powershell
    npm start
    ```
    
@@ -129,12 +135,12 @@ tu-connect/
 ### Frontend Setup
 
 1. **Navigate to the frontend directory**
-   ```bash
+   ```powershell
    cd frontend
    ```
 
 2. **Install frontend dependencies**
-   ```bash
+   ```powershell
    npm install
    ```
 
@@ -146,7 +152,7 @@ tu-connect/
    ```
 
 4. **Start the React development server**
-   ```bash
+   ```powershell
    npm start
    ```
    
@@ -156,9 +162,9 @@ tu-connect/
 
 1. **Register**: Create a new account by providing your email, password, first name, and last name
 2. **Login**: Sign in with your credentials
-3. **Log Experiences**: Click "Log New Experience" to record a stream visit
-4. **View Experiences**: See all your logged experiences on the main page
-5. **Edit/Delete**: Manage your existing experiences
+3. **Log Fishing Trips**: Click "Log New Trip" to record a stream visit
+4. **View Fishing Trips**: See all your logged fishing trips on the main page
+5. **Edit/Delete**: Manage your existing fishing trips
 
 ## API Endpoints
 
@@ -171,14 +177,15 @@ tu-connect/
 - `GET /api/lookups/streams` - Get all streams
 - `GET /api/lookups/species` - Get all fish species
 - `GET /api/lookups/weather-conditions` - Get all weather conditions
-- `GET /api/lookups/water-conditions` - Get all water conditions
+- `GET /api/lookups/water-clarity-conditions` - Get all water clarity conditions
+- `GET /api/lookups/water-level-conditions` - Get all water level conditions
 
-### Experiences (Protected)
-- `GET /api/experiences` - Get all experiences for logged-in user
-- `GET /api/experiences/:id` - Get a specific experience
-- `POST /api/experiences` - Create a new experience
-- `PUT /api/experiences/:id` - Update an experience
-- `DELETE /api/experiences/:id` - Delete an experience
+### Fishing Trips (Protected)
+- `GET /api/trips` - Get all fishing trips for logged-in user
+- `GET /api/trips/:id` - Get a specific fishing trip
+- `POST /api/trips` - Create a new fishing trip
+- `PUT /api/trips/:id` - Update an fishing trip
+- `DELETE /api/trips/:id` - Delete an fishing trip
 
 ### Health Check
 - `GET /api/health` - Check API status
@@ -192,7 +199,7 @@ tu-connect/
    - Configure environment variables in App Service settings
 
 2. **Deploy using Git or Azure CLI**
-   ```bash
+   ```powershell
    az webapp up --name <your-app-name> --resource-group <your-resource-group>
    ```
 
@@ -202,7 +209,7 @@ tu-connect/
 ### Frontend Deployment (Azure Static Web Apps or App Service)
 
 1. **Build the React app**
-   ```bash
+   ```powershell
    cd frontend
    npm run build
    ```
@@ -231,13 +238,14 @@ tu-connect/
 ## Development
 
 ### Running Tests
-```bash
+```powershell
 npm test
 ```
 
 ### Building for Production
-```bash
+```powershell
 # Backend - runs as-is with Node.js
+cd backend
 npm start
 
 # Frontend - create production build

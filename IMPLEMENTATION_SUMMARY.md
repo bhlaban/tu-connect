@@ -2,7 +2,7 @@
 
 ## Overview
 
-TU Connect is a complete, browser-friendly web application that enables Trout Unlimited members to log and manage their stream fishing experiences. The application was built from scratch according to the specified requirements.
+TU Connect is a complete, browser-friendly web application that enables Trout Unlimited members to log and manage their fishing trips. The application was built from scratch according to the specified requirements.
 
 ## ✅ Requirements Met
 
@@ -15,8 +15,8 @@ TU Connect is a complete, browser-friendly web application that enables Trout Un
 - **Implemented:** React 18 with TypeScript
 - **Components:**
   - Login/Register pages for authentication
-  - Experience list with card-based layout
-  - Experience form for creating/editing entries
+  - Fishing trip list with card-based layout
+  - Fishing trip form for creating/editing entries
   - Protected routes with authentication checks
 - **State Management:** React Context API for authentication state
 - **Styling:** Custom CSS with responsive design
@@ -25,7 +25,7 @@ TU Connect is a complete, browser-friendly web application that enables Trout Un
 - **Implemented:** Full integration with Azure SQL Database
 - **Schema:**
   - Users table for account management
-  - Experiences table for logging stream visits
+  - Trips table for logging fishing trips
   - Proper indexes and foreign key relationships
 - **Connection:** Using `mssql` package with encrypted connections
 - **Security:** Prepared statements to prevent SQL injection
