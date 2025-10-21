@@ -12,9 +12,10 @@ const TripForm: React.FC = () => {
   const [formData, setFormData] = useState<TripFormData>({
     streamId: 0,
     location: '',
-    date: new Date().toISOString().split('T')[0],
-    startTime: '',
-    stopTime: '',
+    startDate: new Date().toISOString().split('T')[0],
+    startTime: new Date().toISOString().split('T')[1],
+    stopDate: new Date().toISOString().split('T')[0],
+    stopTime: new Date().toISOString().split('T')[1],
     weatherConditionId: undefined,
     waterClarityConditionId: undefined,
     waterLevelConditionId: undefined,
@@ -239,25 +240,27 @@ const TripForm: React.FC = () => {
 
         <div className="form-row">
           <div className="form-group">
-            <label htmlFor="stopDate">Stop Date</label>
+            <label htmlFor="stopDate">Stop Date *</label>
             <input
               type="date"
               id="stopDate"
               name="stopDate"
               value={formData.stopDate}
               onChange={handleChange}
+              required
               disabled={loading}
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="stopTime">Stop Time</label>
+            <label htmlFor="stopTime">Stop Time *</label>
             <input
               type="time"
               id="stopTime"
               name="stopTime"
               value={formData.stopTime}
               onChange={handleChange}
+              required
               disabled={loading}
             />
           </div>

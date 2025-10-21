@@ -12,8 +12,10 @@ router.post('/', async (req, res) => {
     const {
       streamId,
       location,
-      startDateTime,
-      stopDateTime,
+      startDate,
+      startTime,
+      stopDate,
+      stopTime,
       weatherConditionId,
       waterClarityConditionId,
       waterLevelConditionId,
@@ -26,9 +28,25 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ error: 'Stream is required' });
     }
 
-    // Convert empty strings to null for datetime fields
-    const validStartDateTime = startDateTime && typeof startDateTime === 'string' && startDateTime.trim() !== '' ? startDateTime.trim() : null;
-    const validStopDateTime = stopDateTime && typeof stopDateTime === 'string' && stopDateTime.trim() !== '' ? stopDateTime.trim() : null;
+    if (!startDate) {
+      return res.status(400).json({ error: 'Start date is required' });
+    }
+    
+    if (!startTime) {
+      return res.status(400).json({ error: 'Start time is required' });
+    }
+
+    if (!stopDate) {
+      return res.status(400).json({ error: 'Stop date is required' });
+    }
+
+    if (!stopTime) {
+      return res.status(400).json({ error: 'Stop time is required' });
+    }
+
+    // Combine dates and times for SQL DATETIME format
+    const validStartDateTime = startDate + ' ' + startTime;
+    const validStopDateTime = stopDate + ' ' + stopTime;
 
     const pool = await getConnection();
 
@@ -42,18 +60,17 @@ router.post('/', async (req, res) => {
         .input('userId', sql.Int, req.user.id)
         .input('streamId', sql.Int, streamId)
         .input('location', sql.VarChar, location || null)
-        .input('date', sql.Date, date)
-        .input('startTime', sql.Time, validStartTime)
-        .input('stopTime', sql.Time, validStopTime)
+        .input('startDateTime', sql.DateTime, validStartDateTime)
+        .input('stopDateTime', sql.DateTime, validStopDateTime)
         .input('weatherConditionId', sql.Int, weatherConditionId || null)
         .input('waterClarityConditionId', sql.Int, waterClarityConditionId || null)
         .input('waterLevelConditionId', sql.Int, waterLevelConditionId || null)
         .input('notes', sql.Text, notes || null)
         .query(`
           INSERT INTO Trips 
-          (userId, streamId, location, date, startTime, stopTime, weatherConditionId, waterClarityConditionId, waterLevelConditionId, notes, createdAt) 
+          (userId, streamId, location, startDateTime, stopDateTime, weatherConditionId, waterClarityConditionId, waterLevelConditionId, notes, createdAt) 
           OUTPUT INSERTED.id, INSERTED.*
-          VALUES (@userId, @streamId, @location, @date, @startTime, @stopTime, @weatherConditionId, @waterClarityConditionId, @waterLevelConditionId, @notes, GETDATE())
+          VALUES (@userId, @streamId, @location, @startDateTime, @stopDateTime, @weatherConditionId, @waterClarityConditionId, @waterLevelConditionId, @notes, GETDATE())
         `);
 
       const trip = tripResult.recordset[0];
@@ -204,9 +221,10 @@ router.put('/:id', async (req, res) => {
     const {
       streamId,
       location,
-      date,
-      startDateTime,
-      stopDateTime,
+      startDate,
+      startTime,
+      stopDate,
+      stopTime,
       weatherConditionId,
       waterClarityConditionId,
       waterLevelConditionId,
@@ -226,9 +244,9 @@ router.put('/:id', async (req, res) => {
       return res.status(404).json({ error: 'Trip not found' });
     }
 
-    // Convert empty strings to null for time fields and append seconds for SQL TIME format
-    const validStartDateTime = startDateTime && typeof startDateTime === 'string' && startDateTime.trim() !== '' ? startDateTime.trim() : null;
-    const validStopDateTime = stopDateTime && typeof stopDateTime === 'string' && stopDateTime.trim() !== '' ? stopDateTime.trim() : null;
+    // Combine dates and times for SQL DATETIME format
+    const validStartDateTime = startDate + ' ' + startTime;
+    const validStopDateTime = stopDate + ' ' + stopTime;
 
     // Start a transaction
     const transaction = pool.transaction();
@@ -240,9 +258,8 @@ router.put('/:id', async (req, res) => {
         .input('id', sql.Int, req.params.id)
         .input('streamId', sql.Int, streamId)
         .input('location', sql.VarChar, location || null)
-        .input('date', sql.Date, date)
-        .input('startTime', sql.Time, validStartTime)
-        .input('stopTime', sql.Time, validStopTime)
+        .input('startDateTime', sql.DateTime, validStartDateTime)
+        .input('stopDateTime', sql.DateTime, validStopDateTime)
         .input('weatherConditionId', sql.Int, weatherConditionId || null)
         .input('waterClarityConditionId', sql.Int, waterClarityConditionId || null)
         .input('waterLevelConditionId', sql.Int, waterLevelConditionId || null)
@@ -251,9 +268,8 @@ router.put('/:id', async (req, res) => {
           UPDATE Trips 
           SET streamId = @streamId,
               location = @location,
-              date = @date,
-              startTime = @startTime,
-              stopTime = @stopTime,
+              startDateTime = @startDateTime,
+              stopDateTime = @stopDateTime,
               weatherConditionId = @weatherConditionId,
               waterClarityConditionId = @waterClarityConditionId,
               waterLevelConditionId = @waterLevelConditionId,

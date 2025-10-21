@@ -75,7 +75,7 @@ CREATE TABLE Trips (
     streamId INT NOT NULL,
     location VARCHAR(255) NULL,
     startDateTime DATETIME2 NOT NULL,
-    stopDateTime DATETIME2 NULL,
+    stopDateTime DATETIME2 NOT NULL,
     weatherConditionId INT NULL,
     waterClarityConditionId INT NULL,
     waterLevelConditionId INT NULL,
