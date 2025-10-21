@@ -51,27 +51,30 @@ const TripForm: React.FC = () => {
         setLoading(true);
         const trip = await tripsAPI.getById(parseInt(id!));
         
-        // Format time values for HTML time input (HH:MM format)
-        const formatTime = (timeValue: string | undefined): string => {
-          if (!timeValue) return '';
-          // Handle various time formats from SQL Server
-          // Format: HH:MM:SS or HH:MM:SS.mmm or just HH:MM
-          const timeParts = timeValue.split(':');
-          if (timeParts.length >= 2) {
-            const hours = timeParts[0].padStart(2, '0');
-            const minutes = timeParts[1].padStart(2, '0');
-            return `${hours}:${minutes}`;
-          }
-          return '';
+        // Convert UTC times from database back to local time for editing
+        const convertUTCToLocal = (utcDateTime: string | undefined): { date: string; time: string } => {
+          if (!utcDateTime) return { date: '', time: '' };
+          
+          // Parse the UTC datetime and convert to local time
+          const utcDate = new Date(utcDateTime + (utcDateTime.includes('Z') ? '' : 'Z'));
+          const localDate = new Date(utcDate.getTime() - (new Date().getTimezoneOffset() * 60000));
+          
+          const date = localDate.toISOString().split('T')[0];
+          const time = localDate.toISOString().split('T')[1].substring(0, 5);
+          
+          return { date, time };
         };
+        
+        const startLocal = convertUTCToLocal(trip.startDateTime);
+        const stopLocal = convertUTCToLocal(trip.stopDateTime);
         
         setFormData({
           streamId: trip.streamId,
           location: trip.location || '',
-          startDate: trip.startDateTime?.split('T')[0] || '',
-          stopDate: trip.stopDateTime?.split('T')[0] || '',
-          startTime: formatTime(trip.startDateTime?.split('T')[1]),
-          stopTime: formatTime(trip.stopDateTime?.split('T')[1]),
+          startDate: startLocal.date,
+          stopDate: stopLocal.date,
+          startTime: startLocal.time,
+          stopTime: stopLocal.time,
           weatherConditionId: trip.weatherConditionId,
           waterClarityConditionId: trip.waterClarityConditionId,
           waterLevelConditionId: trip.waterLevelConditionId,
@@ -145,11 +148,13 @@ const TripForm: React.FC = () => {
     setLoading(true);
 
     try {
-      // Prepare submit data with proper time field handling
+      // Prepare submit data with proper time field handling and timezone info
       const submitData = {
         ...formData,
         startTime: formData.startTime?.trim() || '',
         stopTime: formData.stopTime?.trim() || '',
+        timezoneOffset: new Date().getTimezoneOffset(), // Minutes offset from UTC
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone, // IANA timezone name
         catches: validCatches,
       };
 

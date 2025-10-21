@@ -3,6 +3,21 @@ const { getConnection, sql } = require('../config/database');
 const { authenticateToken } = require('../middleware/auth');
 const router = express.Router();
 
+// Helper function to convert UTC datetime to local timezone for display
+const convertUTCToLocal = (utcDateTimeString, timezoneOffset) => {
+  if (!utcDateTimeString || timezoneOffset === undefined) return utcDateTimeString;
+  
+  // Parse the UTC datetime string
+  const utcDate = new Date(utcDateTimeString + 'Z'); // Add Z to indicate UTC
+  
+  // Convert to local time by adding the timezone offset
+  // (timezoneOffset is positive for timezones behind UTC)
+  const localDate = new Date(utcDate.getTime() + (timezoneOffset * 60000));
+  
+  // Return in ISO format (frontend will handle display formatting)
+  return localDate.toISOString();
+};
+
 // All routes require authentication
 router.use(authenticateToken);
 
@@ -16,6 +31,8 @@ router.post('/', async (req, res) => {
       startTime,
       stopDate,
       stopTime,
+      timezoneOffset, // Minutes offset from UTC
+      timezone, // IANA timezone name
       weatherConditionId,
       waterClarityConditionId,
       waterLevelConditionId,
@@ -44,9 +61,28 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ error: 'Stop time is required' });
     }
 
-    // Combine dates and times for SQL DATETIME format
-    const validStartDateTime = startDate + ' ' + startTime;
-    const validStopDateTime = stopDate + ' ' + stopTime;
+    // Convert local time to UTC for storage
+    let validStartDateTime, validStopDateTime;
+    
+    if (timezoneOffset !== undefined) {
+      // Create Date objects from local date/time
+      const startLocal = new Date(`${startDate}T${startTime}`);
+      const stopLocal = new Date(`${stopDate}T${stopTime}`);
+      
+      // Convert to UTC by subtracting the timezone offset
+      // (timezoneOffset is positive for timezones behind UTC)
+      const startUTC = new Date(startLocal.getTime() - (timezoneOffset * 60000));
+      const stopUTC = new Date(stopLocal.getTime() - (timezoneOffset * 60000));
+      
+      // Format for SQL Server (YYYY-MM-DD HH:MM:SS)
+      validStartDateTime = startUTC.toISOString().replace('T', ' ').substring(0, 19);
+      validStopDateTime = stopUTC.toISOString().replace('T', ' ').substring(0, 19);
+    } else {
+      // Fallback: assume local time is UTC (not recommended for production)
+      validStartDateTime = `${startDate} ${startTime}`;
+      validStopDateTime = `${stopDate} ${stopTime}`;
+      console.warn('No timezone offset provided, storing time as-is');
+    }
 
     const pool = await getConnection();
 
@@ -225,6 +261,8 @@ router.put('/:id', async (req, res) => {
       startTime,
       stopDate,
       stopTime,
+      timezoneOffset, // Minutes offset from UTC
+      timezone, // IANA timezone name
       weatherConditionId,
       waterClarityConditionId,
       waterLevelConditionId,
@@ -244,9 +282,28 @@ router.put('/:id', async (req, res) => {
       return res.status(404).json({ error: 'Trip not found' });
     }
 
-    // Combine dates and times for SQL DATETIME format
-    const validStartDateTime = startDate + ' ' + startTime;
-    const validStopDateTime = stopDate + ' ' + stopTime;
+    // Convert local time to UTC for storage
+    let validStartDateTime, validStopDateTime;
+    
+    if (timezoneOffset !== undefined) {
+      // Create Date objects from local date/time
+      const startLocal = new Date(`${startDate}T${startTime}`);
+      const stopLocal = new Date(`${stopDate}T${stopTime}`);
+      
+      // Convert to UTC by subtracting the timezone offset
+      // (timezoneOffset is positive for timezones behind UTC)
+      const startUTC = new Date(startLocal.getTime() - (timezoneOffset * 60000));
+      const stopUTC = new Date(stopLocal.getTime() - (timezoneOffset * 60000));
+      
+      // Format for SQL Server (YYYY-MM-DD HH:MM:SS)
+      validStartDateTime = startUTC.toISOString().replace('T', ' ').substring(0, 19);
+      validStopDateTime = stopUTC.toISOString().replace('T', ' ').substring(0, 19);
+    } else {
+      // Fallback: assume local time is UTC (not recommended for production)
+      validStartDateTime = `${startDate} ${startTime}`;
+      validStopDateTime = `${stopDate} ${stopTime}`;
+      console.warn('No timezone offset provided, storing time as-is');
+    }
 
     // Start a transaction
     const transaction = pool.transaction();

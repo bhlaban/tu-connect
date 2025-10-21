@@ -84,16 +84,31 @@ const TripList: React.FC = () => {
               <div key={trip.id} className="trip-card">
                 <h3>{trip.streamName}</h3>
                 {trip.location && <p className="trip-location">📍 {trip.location}</p>}
-                {trip.startDateTime && (
-                  <p className="date">📅 {trip.startDateTime.split('T')[0]}</p>
-                )}
-                {trip.startDateTime && trip.stopDateTime && (
-                  <p className="time">
-                    ⏰ {trip.startDateTime.split('T')[1]?.substring(0, 5)} - {trip.stopDateTime.split('T')[1]?.substring(0, 5)}
-                    {trip.startDateTime.split('T')[0] !== trip.stopDateTime.split('T')[0] && 
-                      ` (${trip.stopDateTime.split('T')[0]})`}
-                  </p>
-                )}
+                {trip.startDateTime && (() => {
+                  // Convert UTC time to local time for display
+                  const startUTC = new Date(trip.startDateTime + (trip.startDateTime.includes('Z') ? '' : 'Z'));
+                  const startLocal = new Date(startUTC.getTime() - (new Date().getTimezoneOffset() * 60000));
+                  return <p className="date">📅 {startLocal.toISOString().split('T')[0]}</p>;
+                })()}
+                {trip.startDateTime && trip.stopDateTime && (() => {
+                  // Convert UTC times to local times for display  
+                  const startUTC = new Date(trip.startDateTime + (trip.startDateTime.includes('Z') ? '' : 'Z'));
+                  const stopUTC = new Date(trip.stopDateTime + (trip.stopDateTime.includes('Z') ? '' : 'Z'));
+                  const startLocal = new Date(startUTC.getTime() - (new Date().getTimezoneOffset() * 60000));
+                  const stopLocal = new Date(stopUTC.getTime() - (new Date().getTimezoneOffset() * 60000));
+                  
+                  const startTime = startLocal.toISOString().split('T')[1].substring(0, 5);
+                  const stopTime = stopLocal.toISOString().split('T')[1].substring(0, 5);
+                  const startDate = startLocal.toISOString().split('T')[0];
+                  const stopDate = stopLocal.toISOString().split('T')[0];
+                  
+                  return (
+                    <p className="time">
+                      ⏰ {startTime} - {stopTime}
+                      {startDate !== stopDate && ` (${stopDate})`}
+                    </p>
+                  );
+                })()}
                 {trip.weatherCondition && <p className="weather">🌤️ {trip.weatherCondition}</p>}
                 {trip.waterClarityCondition && (
                   <p className="water-clarity">💧 Clarity: {trip.waterClarityCondition}</p>
