@@ -134,12 +134,12 @@ const TripList: React.FC = () => {
                     </p>
                   );
                 })()}
-                {trip.weatherCondition && <p className="weather">🌤️ {trip.weatherCondition}</p>}
+                {trip.weatherCondition && <p className="weather">🌤️ Weather: {trip.weatherCondition}</p>}
                 {trip.waterClarityCondition && (
-                  <p className="water-clarity">💧 Clarity: {trip.waterClarityCondition}</p>
+                  <p className="water-clarity">💧 Water Clarity: {trip.waterClarityCondition}</p>
                 )}
                 {trip.waterLevelCondition && (
-                  <p className="water-level">📊 Level: {trip.waterLevelCondition}</p>
+                  <p className="water-level">📊 Water Level: {trip.waterLevelCondition}</p>
                 )}
                 {trip.catches && trip.catches.length > 0 && (
                   <div className="catches-section">
