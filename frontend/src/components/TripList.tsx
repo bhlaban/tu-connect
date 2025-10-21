@@ -87,20 +87,45 @@ const TripList: React.FC = () => {
                 {trip.startDateTime && (() => {
                   // Convert UTC time to local time for display
                   const startUTC = new Date(trip.startDateTime + (trip.startDateTime.includes('Z') ? '' : 'Z'));
-                  const startLocal = new Date(startUTC.getTime() - (new Date().getTimezoneOffset() * 60000));
-                  return <p className="date">📅 {startLocal.toISOString().split('T')[0]}</p>;
+                  // JavaScript Date object automatically converts UTC to local time when accessing date/time methods
+                  
+                  // Format date as mm/dd/yyyy
+                  const day = String(startUTC.getDate()).padStart(2, '0');
+                  const month = String(startUTC.getMonth() + 1).padStart(2, '0');
+                  const year = startUTC.getFullYear();
+                  const formattedDate = `${month}/${day}/${year}`;
+                  
+                  return <p className="date">📅 {formattedDate}</p>;
                 })()}
                 {trip.startDateTime && trip.stopDateTime && (() => {
                   // Convert UTC times to local times for display  
                   const startUTC = new Date(trip.startDateTime + (trip.startDateTime.includes('Z') ? '' : 'Z'));
                   const stopUTC = new Date(trip.stopDateTime + (trip.stopDateTime.includes('Z') ? '' : 'Z'));
-                  const startLocal = new Date(startUTC.getTime() - (new Date().getTimezoneOffset() * 60000));
-                  const stopLocal = new Date(stopUTC.getTime() - (new Date().getTimezoneOffset() * 60000));
+                  // JavaScript Date object automatically converts UTC to local time when accessing date/time methods
                   
-                  const startTime = startLocal.toISOString().split('T')[1].substring(0, 5);
-                  const stopTime = stopLocal.toISOString().split('T')[1].substring(0, 5);
-                  const startDate = startLocal.toISOString().split('T')[0];
-                  const stopDate = stopLocal.toISOString().split('T')[0];
+                  // Format times in 12-hour AM/PM format
+                  const formatTime12Hour = (date: Date) => {
+                    let hours = date.getHours();
+                    const minutes = String(date.getMinutes()).padStart(2, '0');
+                    const ampm = hours >= 12 ? 'PM' : 'AM';
+                    hours = hours % 12;
+                    hours = hours ? hours : 12; // 0 should be 12
+                    return `${hours}:${minutes} ${ampm}`;
+                  };
+                  
+                  const startTime = formatTime12Hour(startUTC);
+                  const stopTime = formatTime12Hour(stopUTC);
+                  
+                  // Format dates in mm/dd/yyyy format
+                  const formatDate = (date: Date) => {
+                    const day = String(date.getDate()).padStart(2, '0');
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const year = date.getFullYear();
+                    return `${month}/${day}/${year}`;
+                  };
+                  
+                  const startDate = formatDate(startUTC);
+                  const stopDate = formatDate(stopUTC);
                   
                   return (
                     <p className="time">
