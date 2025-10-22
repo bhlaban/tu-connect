@@ -6,7 +6,7 @@ name: tu-connect-api-deploy
 on:
   push:
     branches:
-      - copilot/add-user-registration-feature
+      - main
   workflow_dispatch:
 
 jobs:
