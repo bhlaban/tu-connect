@@ -79,6 +79,8 @@ CREATE TABLE Trips (
     weatherConditionId INT NULL,
     waterClarityConditionId INT NULL,
     waterLevelConditionId INT NULL,
+    waterTemperature DECIMAL(5,2) NULL, -- Water temperature in Fahrenheit
+    dissolvedOxygen DECIMAL(5,2) NULL,  -- Dissolved oxygen in mg/L (ppm)
     notes TEXT NULL,
     createdAt DATETIME2 NOT NULL DEFAULT GETDATE(),
     updatedAt DATETIME2 NULL,

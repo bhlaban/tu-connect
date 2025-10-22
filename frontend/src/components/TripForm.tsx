@@ -19,6 +19,8 @@ const TripForm: React.FC = () => {
     weatherConditionId: undefined,
     waterClarityConditionId: undefined,
     waterLevelConditionId: undefined,
+    waterTemperature: undefined,
+    dissolvedOxygen: undefined,
     notes: '',
     catches: [],
   });
@@ -78,6 +80,8 @@ const TripForm: React.FC = () => {
           weatherConditionId: trip.weatherConditionId,
           waterClarityConditionId: trip.waterClarityConditionId,
           waterLevelConditionId: trip.waterLevelConditionId,
+          waterTemperature: trip.waterTemperature,
+          dissolvedOxygen: trip.dissolvedOxygen,
           notes: trip.notes || '',
           catches: trip.catches || [],
         });
@@ -102,6 +106,8 @@ const TripForm: React.FC = () => {
       [name]: name === 'streamId' || name === 'weatherConditionId' || name === 'waterClarityConditionId' ||
                name === 'waterLevelConditionId'
         ? (value ? parseInt(value) : undefined)
+        : name === 'waterTemperature' || name === 'dissolvedOxygen'
+        ? (value ? parseFloat(value) : undefined)
         : value,
     }));
   };
@@ -323,6 +329,40 @@ const TripForm: React.FC = () => {
               </option>
             ))}
           </select>
+        </div>
+
+        <div className="form-row">
+          <div className="form-group">
+            <label htmlFor="waterTemperature">Water Temperature (°F)</label>
+            <input
+              type="number"
+              step="0.1"
+              id="waterTemperature"
+              name="waterTemperature"
+              value={formData.waterTemperature || ''}
+              onChange={handleChange}
+              disabled={loading}
+              placeholder="e.g., 62.5"
+              min="32"
+              max="100"
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="dissolvedOxygen">Dissolved Oxygen (mg/L)</label>
+            <input
+              type="number"
+              step="0.1"
+              id="dissolvedOxygen"
+              name="dissolvedOxygen"
+              value={formData.dissolvedOxygen || ''}
+              onChange={handleChange}
+              disabled={loading}
+              placeholder="e.g., 8.5"
+              min="0"
+              max="20"
+            />
+          </div>
         </div>
 
         <div className="catches-section">

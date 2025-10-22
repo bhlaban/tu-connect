@@ -141,6 +141,12 @@ const TripList: React.FC = () => {
                 {trip.waterLevelCondition && (
                   <p className="water-level">📊 Water Level: {trip.waterLevelCondition}</p>
                 )}
+                {trip.waterTemperature && (
+                  <p className="water-temperature">🌡️ Water Temp: {trip.waterTemperature}°F</p>
+                )}
+                {trip.dissolvedOxygen && (
+                  <p className="dissolved-oxygen">🫧 Dissolved O₂: {trip.dissolvedOxygen} mg/L</p>
+                )}
                 {trip.catches && trip.catches.length > 0 && (
                   <div className="catches-section">
                     <p className="catches-header">🎣 Catches ({trip.catches.length}):</p>

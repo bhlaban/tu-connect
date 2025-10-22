@@ -73,6 +73,8 @@ export interface Trip {
   waterClarityCondition?: string;
   waterLevelConditionId?: number;
   waterLevelCondition?: string;
+  waterTemperature?: number;
+  dissolvedOxygen?: number;
   notes?: string;
   catches?: Catch[];
   createdAt?: string;
@@ -89,6 +91,8 @@ export interface TripFormData {
   weatherConditionId?: number;
   waterClarityConditionId?: number;
   waterLevelConditionId?: number;
+  waterTemperature?: number;
+  dissolvedOxygen?: number;
   notes: string;
   catches: Catch[];
 }

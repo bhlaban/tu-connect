@@ -36,6 +36,8 @@ router.post('/', async (req, res) => {
       weatherConditionId,
       waterClarityConditionId,
       waterLevelConditionId,
+      waterTemperature,
+      dissolvedOxygen,
       notes,
       catches, // Array of catch objects
     } = req.body;
@@ -101,12 +103,14 @@ router.post('/', async (req, res) => {
         .input('weatherConditionId', sql.Int, weatherConditionId || null)
         .input('waterClarityConditionId', sql.Int, waterClarityConditionId || null)
         .input('waterLevelConditionId', sql.Int, waterLevelConditionId || null)
+        .input('waterTemperature', sql.Decimal(5, 2), waterTemperature || null)
+        .input('dissolvedOxygen', sql.Decimal(5, 2), dissolvedOxygen || null)
         .input('notes', sql.Text, notes || null)
         .query(`
           INSERT INTO Trips 
-          (userId, streamId, location, startDateTime, stopDateTime, weatherConditionId, waterClarityConditionId, waterLevelConditionId, notes, createdAt) 
+          (userId, streamId, location, startDateTime, stopDateTime, weatherConditionId, waterClarityConditionId, waterLevelConditionId, waterTemperature, dissolvedOxygen, notes, createdAt) 
           OUTPUT INSERTED.*
-          VALUES (@userId, @streamId, @location, @startDateTime, @stopDateTime, @weatherConditionId, @waterClarityConditionId, @waterLevelConditionId, @notes, GETDATE())
+          VALUES (@userId, @streamId, @location, @startDateTime, @stopDateTime, @weatherConditionId, @waterClarityConditionId, @waterLevelConditionId, @waterTemperature, @dissolvedOxygen, @notes, GETDATE())
         `);
 
       const trip = tripResult.recordset[0];
@@ -266,6 +270,8 @@ router.put('/:id', async (req, res) => {
       weatherConditionId,
       waterClarityConditionId,
       waterLevelConditionId,
+      waterTemperature,
+      dissolvedOxygen,
       notes,
       catches,
     } = req.body;
@@ -320,6 +326,8 @@ router.put('/:id', async (req, res) => {
         .input('weatherConditionId', sql.Int, weatherConditionId || null)
         .input('waterClarityConditionId', sql.Int, waterClarityConditionId || null)
         .input('waterLevelConditionId', sql.Int, waterLevelConditionId || null)
+        .input('waterTemperature', sql.Decimal(5, 2), waterTemperature || null)
+        .input('dissolvedOxygen', sql.Decimal(5, 2), dissolvedOxygen || null)
         .input('notes', sql.Text, notes || null)
         .query(`
           UPDATE Trips 
@@ -330,6 +338,8 @@ router.put('/:id', async (req, res) => {
               weatherConditionId = @weatherConditionId,
               waterClarityConditionId = @waterClarityConditionId,
               waterLevelConditionId = @waterLevelConditionId,
+              waterTemperature = @waterTemperature,
+              dissolvedOxygen = @dissolvedOxygen,
               notes = @notes,
               updatedAt = GETDATE()
           OUTPUT INSERTED.*
