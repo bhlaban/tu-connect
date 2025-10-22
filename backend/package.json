@@ -1,0 +1,23 @@
+{
+  "name": "tu-connect",
+  "version": "1.0.0",
+  "description": "A web application for Trout Unlimited members to log their stream experiences",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "echo \"No tests specified\" && exit 0"
+  },
+  "keywords": ["trout", "fishing", "streams", "logging"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "body-parser": "^2.2.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mssql": "^12.0.0"
+  }
+}

@@ -1,0 +1,405 @@
+const express = require('express');
+const { getConnection, sql } = require('../config/database');
+const { authenticateToken } = require('../middleware/auth');
+const router = express.Router();
+
+// Helper function to convert UTC datetime to local timezone for display
+const convertUTCToLocal = (utcDateTimeString, timezoneOffset) => {
+  if (!utcDateTimeString || timezoneOffset === undefined) return utcDateTimeString;
+  
+  // Parse the UTC datetime string
+  const utcDate = new Date(utcDateTimeString + 'Z'); // Add Z to indicate UTC
+  
+  // Convert to local time by adding the timezone offset
+  // (timezoneOffset is positive for timezones behind UTC)
+  const localDate = new Date(utcDate.getTime() + (timezoneOffset * 60000));
+  
+  // Return in ISO format (frontend will handle display formatting)
+  return localDate.toISOString();
+};
+
+// All routes require authentication
+router.use(authenticateToken);
+
+// Create a new trip
+router.post('/', async (req, res) => {
+  try {
+    const {
+      streamId,
+      location,
+      startDate,
+      startTime,
+      stopDate,
+      stopTime,
+      timezoneOffset, // Minutes offset from UTC
+      timezone, // IANA timezone name
+      weatherConditionId,
+      waterClarityConditionId,
+      waterLevelConditionId,
+      waterTemperature,
+      dissolvedOxygen,
+      notes,
+      catches, // Array of catch objects
+    } = req.body;
+
+    // Validation
+    if (!streamId) {
+      return res.status(400).json({ error: 'Stream is required' });
+    }
+
+    if (!startDate) {
+      return res.status(400).json({ error: 'Start date is required' });
+    }
+    
+    if (!startTime) {
+      return res.status(400).json({ error: 'Start time is required' });
+    }
+
+    if (!stopDate) {
+      return res.status(400).json({ error: 'Stop date is required' });
+    }
+
+    if (!stopTime) {
+      return res.status(400).json({ error: 'Stop time is required' });
+    }
+
+    // Convert local time to UTC for storage
+    let validStartDateTime, validStopDateTime;
+    
+    if (timezoneOffset !== undefined) {
+      // Create Date objects from local date/time
+      const startLocal = new Date(`${startDate}T${startTime}`);
+      const stopLocal = new Date(`${stopDate}T${stopTime}`);
+      
+      // Convert to UTC by subtracting the timezone offset
+      // (timezoneOffset is positive for timezones behind UTC)
+      const startUTC = new Date(startLocal.getTime() - (timezoneOffset * 60000));
+      const stopUTC = new Date(stopLocal.getTime() - (timezoneOffset * 60000));
+      
+      // Format for SQL Server (YYYY-MM-DD HH:MM:SS)
+      validStartDateTime = startUTC.toISOString().replace('T', ' ').substring(0, 19);
+      validStopDateTime = stopUTC.toISOString().replace('T', ' ').substring(0, 19);
+    } else {
+      // Fallback: assume local time is UTC (not recommended for production)
+      validStartDateTime = `${startDate} ${startTime}`;
+      validStopDateTime = `${stopDate} ${stopTime}`;
+      console.warn('No timezone offset provided, storing time as-is');
+    }
+
+    const pool = await getConnection();
+
+    // Start a transaction
+    const transaction = pool.transaction();
+    await transaction.begin();
+
+    try {
+      // Insert trip
+      const tripResult = await transaction.request()
+        .input('userId', sql.Int, req.user.id)
+        .input('streamId', sql.Int, streamId)
+        .input('location', sql.VarChar, location || null)
+        .input('startDateTime', sql.DateTime, validStartDateTime)
+        .input('stopDateTime', sql.DateTime, validStopDateTime)
+        .input('weatherConditionId', sql.Int, weatherConditionId || null)
+        .input('waterClarityConditionId', sql.Int, waterClarityConditionId || null)
+        .input('waterLevelConditionId', sql.Int, waterLevelConditionId || null)
+        .input('waterTemperature', sql.Decimal(5, 2), waterTemperature || null)
+        .input('dissolvedOxygen', sql.Decimal(5, 2), dissolvedOxygen || null)
+        .input('notes', sql.Text, notes || null)
+        .query(`
+          INSERT INTO Trips 
+          (userId, streamId, location, startDateTime, stopDateTime, weatherConditionId, waterClarityConditionId, waterLevelConditionId, waterTemperature, dissolvedOxygen, notes, createdAt) 
+          OUTPUT INSERTED.*
+          VALUES (@userId, @streamId, @location, @startDateTime, @stopDateTime, @weatherConditionId, @waterClarityConditionId, @waterLevelConditionId, @waterTemperature, @dissolvedOxygen, @notes, GETDATE())
+        `);
+
+      const trip = tripResult.recordset[0];
+
+      // Insert catches if provided (each catch is unique, no quantity)
+      if (catches && catches.length > 0) {
+        for (const catchItem of catches) {
+          await transaction.request()
+            .input('tripId', sql.Int, trip.id)
+            .input('speciesId', sql.Int, catchItem.speciesId)
+            .input('length', sql.Decimal(5, 2), catchItem.length || null)
+            .input('notes', sql.Text, catchItem.notes || null)
+            .query(`
+              INSERT INTO Catches (tripId, speciesId, length, notes, createdAt)
+              VALUES (@tripId, @speciesId, @length, @notes, GETDATE())
+            `);
+        }
+      }
+
+      await transaction.commit();
+
+      res.status(201).json({
+        message: 'Trip logged successfully',
+        trip: trip,
+      });
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
+    }
+  } catch (error) {
+    console.error('Error creating trip:', error);
+    res.status(500).json({ error: 'Failed to log trip' });
+  }
+});
+
+// Get all trips for the logged-in user
+router.get('/', async (req, res) => {
+  try {
+    const pool = await getConnection();
+
+    const result = await pool.request()
+      .input('userId', sql.Int, req.user.id)
+      .query(`
+        SELECT 
+          t.*,
+          s.name as streamName,
+          wc.name as weatherCondition,
+          wcl.name as waterClarityCondition,
+          wlc.name as waterLevelCondition
+        FROM Trips t
+        INNER JOIN Streams s ON t.streamId = s.id
+        LEFT JOIN WeatherConditions wc ON t.weatherConditionId = wc.id
+        LEFT JOIN WaterClarityConditions wcl ON t.waterClarityConditionId = wcl.id
+        LEFT JOIN WaterLevelConditions wlc ON t.waterLevelConditionId = wlc.id
+        WHERE t.userId = @userId 
+        ORDER BY t.startDateTime DESC, t.createdAt DESC
+      `);
+
+    // Get catches for each trip
+    const trips = result.recordset;
+    for (const trip of trips) {
+      const catchesResult = await pool.request()
+        .input('tripId', sql.Int, trip.id)
+        .query(`
+          SELECT 
+            c.id,
+            c.length,
+            c.notes,
+            sp.id as speciesId,
+            sp.name as speciesName,
+            sp.scientificName
+          FROM Catches c
+          INNER JOIN Species sp ON c.speciesId = sp.id
+          WHERE c.tripId = @tripId
+          ORDER BY c.createdAt
+        `);
+      trip.catches = catchesResult.recordset;
+    }
+
+    res.json({
+      trips: trips,
+    });
+  } catch (error) {
+    console.error('Error fetching trips:', error);
+    res.status(500).json({ error: 'Failed to fetch trips' });
+  }
+});
+
+// Get a single trip by ID
+router.get('/:id', async (req, res) => {
+  try {
+    const pool = await getConnection();
+
+    const result = await pool.request()
+      .input('id', sql.Int, req.params.id)
+      .input('userId', sql.Int, req.user.id)
+      .query(`
+        SELECT 
+          t.*,
+          s.name as streamName,
+          wc.name as weatherCondition,
+          wcl.name as waterClarityCondition,
+          wlc.name as waterLevelCondition
+        FROM Trips t
+        INNER JOIN Streams s ON t.streamId = s.id
+        LEFT JOIN WeatherConditions wc ON t.weatherConditionId = wc.id
+        LEFT JOIN WaterClarityConditions wcl ON t.waterClarityConditionId = wcl.id
+        LEFT JOIN WaterLevelConditions wlc ON t.waterLevelConditionId = wlc.id
+        WHERE t.id = @id AND t.userId = @userId
+      `);
+
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ error: 'Trip not found' });
+    }
+
+    const trip = result.recordset[0];
+
+    // Get catches for the trip
+    const catchesResult = await pool.request()
+      .input('tripId', sql.Int, trip.id)
+      .query(`
+        SELECT 
+          c.id,
+          c.length,
+          c.notes,
+          sp.id as speciesId,
+          sp.name as speciesName,
+          sp.scientificName
+        FROM Catches c
+        INNER JOIN Species sp ON c.speciesId = sp.id
+        WHERE c.tripId = @tripId
+        ORDER BY c.createdAt
+      `);
+    trip.catches = catchesResult.recordset;
+
+    res.json({
+      trip: trip,
+    });
+  } catch (error) {
+    console.error('Error fetching trip:', error);
+    res.status(500).json({ error: 'Failed to fetch trip' });
+  }
+});
+
+// Update a trip
+router.put('/:id', async (req, res) => {
+  try {
+    const {
+      streamId,
+      location,
+      startDate,
+      startTime,
+      stopDate,
+      stopTime,
+      timezoneOffset, // Minutes offset from UTC
+      timezone, // IANA timezone name
+      weatherConditionId,
+      waterClarityConditionId,
+      waterLevelConditionId,
+      waterTemperature,
+      dissolvedOxygen,
+      notes,
+      catches,
+    } = req.body;
+
+    const pool = await getConnection();
+
+    // Check if trip exists and belongs to user
+    const checkResult = await pool.request()
+      .input('id', sql.Int, req.params.id)
+      .input('userId', sql.Int, req.user.id)
+      .query('SELECT id FROM Trips WHERE id = @id AND userId = @userId');
+
+    if (checkResult.recordset.length === 0) {
+      return res.status(404).json({ error: 'Trip not found' });
+    }
+
+    // Convert local time to UTC for storage
+    let validStartDateTime, validStopDateTime;
+    
+    if (timezoneOffset !== undefined) {
+      // Create Date objects from local date/time
+      const startLocal = new Date(`${startDate}T${startTime}`);
+      const stopLocal = new Date(`${stopDate}T${stopTime}`);
+      
+      // Convert to UTC by subtracting the timezone offset
+      // (timezoneOffset is positive for timezones behind UTC)
+      const startUTC = new Date(startLocal.getTime() - (timezoneOffset * 60000));
+      const stopUTC = new Date(stopLocal.getTime() - (timezoneOffset * 60000));
+      
+      // Format for SQL Server (YYYY-MM-DD HH:MM:SS)
+      validStartDateTime = startUTC.toISOString().replace('T', ' ').substring(0, 19);
+      validStopDateTime = stopUTC.toISOString().replace('T', ' ').substring(0, 19);
+    } else {
+      // Fallback: assume local time is UTC (not recommended for production)
+      validStartDateTime = `${startDate} ${startTime}`;
+      validStopDateTime = `${stopDate} ${stopTime}`;
+      console.warn('No timezone offset provided, storing time as-is');
+    }
+
+    // Start a transaction
+    const transaction = pool.transaction();
+    await transaction.begin();
+
+    try {
+      // Update trip
+      const result = await transaction.request()
+        .input('id', sql.Int, req.params.id)
+        .input('streamId', sql.Int, streamId)
+        .input('location', sql.VarChar, location || null)
+        .input('startDateTime', sql.DateTime, validStartDateTime)
+        .input('stopDateTime', sql.DateTime, validStopDateTime)
+        .input('weatherConditionId', sql.Int, weatherConditionId || null)
+        .input('waterClarityConditionId', sql.Int, waterClarityConditionId || null)
+        .input('waterLevelConditionId', sql.Int, waterLevelConditionId || null)
+        .input('waterTemperature', sql.Decimal(5, 2), waterTemperature || null)
+        .input('dissolvedOxygen', sql.Decimal(5, 2), dissolvedOxygen || null)
+        .input('notes', sql.Text, notes || null)
+        .query(`
+          UPDATE Trips 
+          SET streamId = @streamId,
+              location = @location,
+              startDateTime = @startDateTime,
+              stopDateTime = @stopDateTime,
+              weatherConditionId = @weatherConditionId,
+              waterClarityConditionId = @waterClarityConditionId,
+              waterLevelConditionId = @waterLevelConditionId,
+              waterTemperature = @waterTemperature,
+              dissolvedOxygen = @dissolvedOxygen,
+              notes = @notes,
+              updatedAt = GETDATE()
+          OUTPUT INSERTED.*
+          WHERE id = @id
+        `);
+
+      // Delete existing catches and insert new ones
+      await transaction.request()
+        .input('tripId', sql.Int, req.params.id)
+        .query('DELETE FROM Catches WHERE tripId = @tripId');
+
+      if (catches && catches.length > 0) {
+        for (const catchItem of catches) {
+          await transaction.request()
+            .input('tripId', sql.Int, req.params.id)
+            .input('speciesId', sql.Int, catchItem.speciesId)
+            .input('length', sql.Decimal(5, 2), catchItem.length || null)
+            .input('notes', sql.Text, catchItem.notes || null)
+            .query(`
+              INSERT INTO Catches (tripId, speciesId, length, notes, createdAt)
+              VALUES (@tripId, @speciesId, @length, @notes, GETDATE())
+            `);
+        }
+      }
+
+      await transaction.commit();
+
+      res.json({
+        message: 'Trip updated successfully',
+        trip: result.recordset[0],
+      });
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
+    }
+  } catch (error) {
+    console.error('Error updating trip:', error);
+    res.status(500).json({ error: 'Failed to update trip' });
+  }
+});
+
+// Delete a trip
+router.delete('/:id', async (req, res) => {
+  try {
+    const pool = await getConnection();
+
+    const result = await pool.request()
+      .input('id', sql.Int, req.params.id)
+      .input('userId', sql.Int, req.user.id)
+      .query('DELETE FROM Trips WHERE id = @id AND userId = @userId');
+
+    if (result.rowsAffected[0] === 0) {
+      return res.status(404).json({ error: 'Trip not found' });
+    }
+
+    res.json({ message: 'Trip deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting trip:', error);
+    res.status(500).json({ error: 'Failed to delete trip' });
+  }
+});
+
+module.exports = router;
