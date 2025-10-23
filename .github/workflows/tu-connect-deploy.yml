@@ -54,7 +54,7 @@ jobs:
           cd frontend
           npm install
           npm run build --if-present
-          npm run test --if-present --passWithNoTests
+          npm run test --if-present
 
       - name: Upload frontend artifact for deployment job
         uses: actions/upload-artifact@v4
