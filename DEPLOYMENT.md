@@ -32,8 +32,6 @@
 
 ## Step 2: Deploy Backend API (Azure App Service)
 
-### Option A: Using Azure Portal
-
 1. **Create Web App:**
    - Navigate to "Create a resource" > "Web App"
    - Configure:
@@ -68,84 +66,215 @@
    - Go to "Configuration" > "General settings"
    - Startup Command: `cd backend && node server.js`
 
-### Option B: Using Azure CLI
 
-```bash
-# Login to Azure
-az login
 
-# Create resource group
-az group create --name tu-connect-rg --location eastus
+## Step 3: Deploy Frontend (Azure App Service)
 
-# Create App Service plan
-az appservice plan create --name tu-connect-plan --resource-group tu-connect-rg --sku B1 --is-linux
+#### Prerequisites
+- Ensure your React app builds successfully locally
+- Have your backend API URL ready (from Step 2)
 
-# Create Web App
-az webapp create --resource-group tu-connect-rg --plan tu-connect-plan --name tu-connect-api --runtime "NODE:18-lts"
+#### 1. Environment Variables for React
 
-# Configure app settings
-az webapp config appsettings set --resource-group tu-connect-rg --name tu-connect-api --settings \
-  DB_SERVER=<your-server-name>.database.windows.net \
-  DB_DATABASE=tu-connect \
-  DB_USER=<your-username> \
-  DB_PASSWORD=<your-password> \
-  DB_PORT=1433 \
-  JWT_SECRET=<your-secure-secret> \
-  NODE_ENV=production
+**Important: Choose ONE approach based on where you build your app:**
 
-# Deploy code
-az webapp up --name tu-connect-api --resource-group tu-connect-rg
+**Option A: Building in GitHub Actions (Your Current Setup)**
+- Environment variables are set in the workflow file
+- No `.env.production` file needed
+- No `REACT_APP_API_URL` in Application Settings needed
+
+**Option B: Building on Azure App Service**
+- Set `REACT_APP_API_URL` in Application Settings
+- Azure reads these during the build process
+- No `.env.production` file needed
+
+#### 2. Build Configuration
+
+Ensure your `frontend/package.json` has the build script:
+```json
+"scripts": {
+  "build": "react-scripts build"
+}
 ```
 
-## Step 3: Deploy Frontend (Azure Static Web Apps)
+#### 2. Create Azure App Service for Frontend
 
-### Option A: Using Azure Portal with GitHub
+1. **Create Web App:**
+   - Navigate to "Create a resource" → "Web App"
+   - Configuration:
+     - **App name:** `tu-connect-frontend` (globally unique)
+     - **Runtime stack:** Node.js 18 LTS
+     - **Operating System:** Linux
+     - **Region:** Same as your backend API
+     - **App Service Plan:** Use existing or create new (B1 tier minimum)
 
-1. **Create Static Web App:**
-   - Navigate to "Create a resource" > "Static Web App"
-   - Configure:
-     - Name: `tu-connect-frontend`
-     - Sign in with GitHub
-     - Select your repository and branch
-     - Build Presets: React
-     - App location: `/frontend`
-     - Api location: (leave empty)
-     - Output location: `build`
-
-2. **Configure Environment Variables:**
-   - Go to your Static Web App > "Configuration"
-   - Add:
+2. **Configure Application Settings:**
+   - Go to App Service → "Configuration" → "Application settings"
+   - Add these settings:
      ```
-     REACT_APP_API_URL=https://tu-connect-api.azurewebsites.net/api
+     WEBSITE_NODE_DEFAULT_VERSION=18-lts
+     SCM_DO_BUILD_DURING_DEPLOYMENT=true
      ```
+   
+   **Note:** If you're using GitHub Actions to build (like in your current setup), you don't need `REACT_APP_API_URL` in Application Settings since it's already set in the workflow.
 
-3. **Deploy:**
-   - GitHub Actions workflow is automatically created
-   - Push to your repository triggers automatic deployment
 
-### Option B: Using Azure App Service for Frontend
 
-1. **Build React App:**
-   ```bash
-   cd frontend
-   npm run build
-   ```
+#### 3. Configure Web Server for SPA
 
-2. **Create Web App:**
-   ```bash
-   az webapp create --resource-group tu-connect-rg --plan tu-connect-plan --name tu-connect-frontend --runtime "NODE:18-lts"
-   ```
+**Critical: Configure URL Rewriting for React Router**
 
-3. **Deploy Build:**
-   ```bash
-   cd build
-   zip -r build.zip .
-   az webapp deployment source config-zip --resource-group tu-connect-rg --name tu-connect-frontend --src build.zip
-   ```
+Create `frontend/web.config` for proper SPA routing:
+```xml
+<?xml version="1.0"?>
+<configuration>
+  <system.webServer>
+    <rewrite>
+      <rules>
+        <rule name="React Routes" stopProcessing="true">
+          <match url=".*" />
+          <conditions logicalGrouping="MatchAll">
+            <add input="{REQUEST_FILENAME}" matchType="IsFile" negate="true" />
+            <add input="{REQUEST_FILENAME}" matchType="IsDirectory" negate="true" />
+          </conditions>
+          <action type="Rewrite" url="/" />
+        </rule>
+      </rules>
+    </rewrite>
+    <staticContent>
+      <mimeMap fileExtension=".json" mimeType="application/json" />
+    </staticContent>
+  </system.webServer>
+</configuration>
+```
 
-4. **Configure:**
-   - Add `REACT_APP_API_URL` environment variable
-   - Configure web server to serve index.html for all routes
+**Alternative: Create startup script for Express server**
+Create `frontend/server.js`:
+```javascript
+const express = require('express');
+const path = require('path');
+const app = express();
+
+// Serve static files from build directory
+app.use(express.static(path.join(__dirname, 'build')));
+
+// Handle React routing, return all requests to React app
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'build', 'index.html'));
+});
+
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+  console.log(`Frontend server running on port ${port}`);
+});
+```
+
+If using server.js approach, update `frontend/package.json`:
+```json
+{
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.0"
+  }
+}
+```
+
+#### 4. Deploy Frontend Code
+
+**Method 1: Local Git Deployment**
+```bash
+# Navigate to frontend directory
+cd frontend
+
+# Initialize git if not already done
+git init
+
+# Add Azure remote
+git remote add azure https://<deployment-username>@tu-connect-frontend.scm.azurewebsites.net/tu-connect-frontend.git
+
+# Commit and push
+git add .
+git commit -m "Deploy frontend"
+git push azure main
+```
+
+**Method 2: ZIP Deployment**
+```bash
+# Create deployment package
+cd frontend
+npm run build
+
+# Create zip of entire project (not just build folder)
+powershell Compress-Archive -Path * -DestinationPath deploy.zip -Force
+
+# Deploy using Azure CLI
+az webapp deployment source config-zip \
+  --resource-group tu-connect-rg \
+  --name tu-connect-frontend \
+  --src deploy.zip
+```
+
+**Method 3: GitHub Actions (Recommended)**
+Create `.github/workflows/frontend-deploy.yml`:
+```yaml
+name: Deploy Frontend to Azure App Service
+
+on:
+  push:
+    branches: [ main ]
+    paths: [ 'frontend/**' ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '18'
+        
+    - name: Install and build
+      run: |
+        cd frontend
+        npm ci
+        npm run build
+        
+    - name: Deploy to Azure App Service
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: 'tu-connect-frontend'
+        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+        package: frontend
+```
+
+#### 5. Configure Startup Command
+
+In Azure Portal:
+1. Go to App Service → "Configuration" → "General settings"
+2. **Startup Command:** 
+   - If using web.config: Leave empty (IIS handles it)
+   - If using server.js: `node server.js`
+   - If serving build directly: `npx serve -s build -p $PORT`
+
+#### 6. Enable Compression and Caching
+
+Add to Application Settings:
+```
+WEBSITE_COMPRESS_STATIC_FILES=true
+WEBSITE_ENABLE_SYNC_UPDATE_SITE=true
+```
+
+**Configure caching headers** by adding to `web.config`:
+```xml
+<staticContent>
+  <clientCache cacheControlMode="UseMaxAge" cacheControlMaxAge="31536000" />
+</staticContent>
+```
 
 ## Step 4: Configure CORS
 
@@ -164,7 +293,7 @@ az webapp up --name tu-connect-api --resource-group tu-connect-rg
 3. Configure DNS records as instructed
 
 ### Frontend
-1. Go to Static Web App > "Custom domains"
+1. Go to App Service > "Custom domains"
 2. Add custom domain (e.g., `tuconnect.com`)
 3. Configure DNS records as instructed
 
@@ -193,7 +322,6 @@ az webapp up --name tu-connect-api --resource-group tu-connect-rg
 - **Development:**
   - App Service: Basic (B1) tier
   - SQL Database: Basic tier
-  - Static Web Apps: Free tier
 
 - **Production:**
   - App Service: Standard (S1) or Premium
@@ -237,10 +365,40 @@ az webapp up --name tu-connect-api --resource-group tu-connect-rg
 - Check CORS settings
 
 ### Frontend Issues
-- Verify API URL in environment variables
-- Check browser console for errors
-- Ensure CORS is configured correctly
-- Test API endpoints directly
+
+**Common Problems and Solutions:**
+
+1. **React Router not working (404 on refresh):**
+   - Ensure `web.config` is properly configured for URL rewriting
+   - Or use Express server with catch-all route
+   - Verify startup command is correct
+
+2. **API calls failing:**
+   - Check `REACT_APP_API_URL` environment variable
+   - Verify CORS settings on backend
+   - Check browser network tab for actual URLs being called
+   - Test API endpoints directly: `curl https://tu-connect-api.azurewebsites.net/api/auth/me`
+
+3. **Build/Deployment Issues:**
+   - Ensure `npm run build` works locally
+   - Check deployment logs in Azure Portal (Deployment Center → Logs)
+   - Verify Node.js version compatibility
+   - Clear build cache: `rm -rf node_modules package-lock.json && npm install`
+
+4. **Environment Variables not loading:**
+   - React environment variables must start with `REACT_APP_`
+   - Restart App Service after adding environment variables
+   - Check that variables are set in Application Settings, not Connection Strings
+
+5. **Static files not loading:**
+   - Verify build folder structure is correct
+   - Check that static files are in correct paths
+   - Ensure MIME types are configured properly
+
+**Debugging Steps:**
+- Check deployment logs in Azure Portal: App Service → Deployment Center → Logs
+- Test if app is responding: Visit `https://tu-connect-frontend.azurewebsites.net` in browser
+- Check environment variables in Azure Portal: App Service → Configuration → Application settings
 
 ### Database Issues
 - Verify firewall rules
