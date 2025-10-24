@@ -11,7 +11,7 @@
 1. **Using Azure Portal:**
    - Navigate to "Create a resource" > "Databases" > "SQL Database"
    - Configure:
-     - Database name: `tu-connect`
+     - Database name: `tu-connect-db`
      - Server: Create new or use existing
      - Compute + storage: Choose appropriate tier (Basic or Standard for development)
      - Backup storage redundancy: Locally-redundant
@@ -27,7 +27,7 @@
 
 4. **Note Connection Details:**
    - Server name: `<your-server-name>.database.windows.net`
-   - Database name: `tu-connect`
+   - Database name: `tu-connect-db`
    - Admin username and password
 
 ## Step 2: Deploy Backend API (Azure App Service)

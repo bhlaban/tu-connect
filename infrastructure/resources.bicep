@@ -102,48 +102,7 @@ resource backendApp 'Microsoft.Web/sites@2023-01-01' = {
       httpLoggingEnabled: true
       logsDirectorySizeLimit: 35
       detailedErrorLoggingEnabled: true
-      appSettings: [
-        {
-          name: 'DB_SERVER'
-          value: sqlServer.properties.fullyQualifiedDomainName
-        }
-        {
-          name: 'DB_DATABASE'
-          value: sqlDatabaseName
-        }
-        {
-          name: 'DB_USER'
-          value: sqlAdminLogin
-        }
-        {
-          name: 'DB_PASSWORD'
-          value: sqlAdminPassword
-        }
-        {
-          name: 'DB_PORT'
-          value: '1433'
-        }
-        {
-          name: 'JWT_SECRET'
-          value: jwtSecret
-        }
-        {
-          name: 'NODE_ENV'
-          value: 'production'
-        }
-        {
-          name: 'PORT'
-          value: '8080'
-        }
-        {
-          name: 'WEBSITE_NODE_DEFAULT_VERSION'
-          value: '18-lts'
-        }
-        {
-          name: 'SCM_DO_BUILD_DURING_DEPLOYMENT'
-          value: 'true'
-        }
-      ]
+      appCommandLine: 'node server.js'
       cors: {
         allowedOrigins: [
           'https://${frontendAppName}.azurewebsites.net'
@@ -236,6 +195,16 @@ resource backendAppInsightsConfig 'Microsoft.Web/sites/config@2023-01-01' = {
   properties: {
     APPINSIGHTS_INSTRUMENTATIONKEY: appInsights.properties.InstrumentationKey
     APPLICATIONINSIGHTS_CONNECTION_STRING: appInsights.properties.ConnectionString
+    DB_SERVER: sqlServer.properties.fullyQualifiedDomainName
+    DB_DATABASE: sqlDatabaseName
+    DB_USER: sqlAdminLogin
+    DB_PASSWORD: sqlAdminPassword
+    DB_PORT: '1433'
+    JWT_SECRET: jwtSecret
+    NODE_ENV: 'production'
+    PORT: '8080'
+    WEBSITE_NODE_DEFAULT_VERSION: '18-lts'
+    SCM_DO_BUILD_DURING_DEPLOYMENT: 'true'
   }
 }
 
