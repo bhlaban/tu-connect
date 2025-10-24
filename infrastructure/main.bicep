@@ -1,14 +1,14 @@
 targetScope = 'subscription'
 
-@description('The name prefix for all resources')
-param appName string
-
 @description('The location for all resources')
 param location string
 
 @description('Environment name (dev, staging, prod)')
 @allowed(['dev', 'staging', 'prod'])
 param environment string
+
+@description('The name prefix for all resources')
+param appName string
 
 @description('App Service Plan SKU')
 @allowed(['B1', 'S1', 'P1v2', 'P2v2'])
