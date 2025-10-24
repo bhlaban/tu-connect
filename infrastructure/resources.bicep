@@ -102,7 +102,7 @@ resource backendApp 'Microsoft.Web/sites@2023-01-01' = {
       httpLoggingEnabled: true
       logsDirectorySizeLimit: 35
       detailedErrorLoggingEnabled: true
-      appCommandLine: 'node server.js'
+      appCommandLine: 'npm start'
       cors: {
         allowedOrigins: [
           'https://${frontendAppName}.azurewebsites.net'
@@ -129,6 +129,7 @@ resource frontendApp 'Microsoft.Web/sites@2023-01-01' = {
       httpLoggingEnabled: true
       logsDirectorySizeLimit: 35
       detailedErrorLoggingEnabled: true
+      appCommandLine: 'npm start'
       appSettings: [
         {
           name: 'REACT_APP_API_URL'
