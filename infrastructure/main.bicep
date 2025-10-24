@@ -38,6 +38,7 @@ var appServicePlanName = '${resourceNamePrefix}-plan'
 var backendAppName = '${resourceNamePrefix}-backend'
 var frontendAppName = '${resourceNamePrefix}-frontend'
 var appInsightsName = '${resourceNamePrefix}-insights'
+var logAnalyticsWorkspaceName = '${resourceNamePrefix}-logs'
 
 // Resource Group
 resource resourceGroup 'Microsoft.Resources/resourceGroups@2023-07-01' = {
@@ -63,6 +64,7 @@ module resources './resources.bicep' = {
     frontendAppName: frontendAppName
     jwtSecret: jwtSecret
     appInsightsName: appInsightsName
+    logAnalyticsWorkspaceName: logAnalyticsWorkspaceName
   }
 }
 
@@ -77,3 +79,4 @@ output frontendAppName string = resources.outputs.frontendAppName
 output frontendAppUrl string = resources.outputs.frontendAppUrl
 output appServicePlanName string = resources.outputs.appServicePlanName
 output appInsightsName string = resources.outputs.appInsightsName
+output logAnalyticsWorkspaceName string = resources.outputs.logAnalyticsWorkspaceName

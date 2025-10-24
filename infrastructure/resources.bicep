@@ -36,6 +36,9 @@ param jwtSecret string
 @description('App Insights name')
 param appInsightsName string
 
+@description('Log Analytics workspace name')
+param logAnalyticsWorkspaceName string
+
 // SQL Server
 resource sqlServer 'Microsoft.Sql/servers@2023-05-01-preview' = {
   name: sqlServerName
@@ -199,6 +202,21 @@ resource frontendApp 'Microsoft.Web/sites@2023-01-01' = {
   }
 }
 
+// Log Analytics workspace
+resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
+  name: logAnalyticsWorkspaceName
+  location: location
+  properties: {
+    sku: {
+      name: 'PerGB2018'
+    }
+    retentionInDays: 30
+    features: {
+      enableLogAccessUsingOnlyResourcePermissions: true
+    }
+  }
+}
+
 // Application Insights for monitoring
 resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
   name: appInsightsName
@@ -207,6 +225,7 @@ resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
   properties: {
     Application_Type: 'web'
     Request_Source: 'rest'
+    WorkspaceResourceId: logAnalyticsWorkspace.id
   }
 }
 
@@ -229,4 +248,5 @@ output backendAppName string = backendApp.name
 output backendAppUrl string = 'https://${backendApp.properties.defaultHostName}'
 output frontendAppName string = frontendApp.name
 output frontendAppUrl string = 'https://${frontendApp.properties.defaultHostName}'
+output logAnalyticsWorkspaceName string = logAnalyticsWorkspace.name
 output appInsightsName string = appInsights.name

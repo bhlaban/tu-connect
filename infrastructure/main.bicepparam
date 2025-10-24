@@ -1,0 +1,10 @@
+using './main.bicep'
+
+param location = 'centralus'
+param environment = 'prod'
+param appName =  'tu-connect'
+param appServicePlanSku = 'S1'
+param sqlDatabaseSku = 'S0'
+param sqlAdminLogin = 'tu-connect-sql-admin'
+param sqlAdminPassword = ''
+param jwtSecret = ''

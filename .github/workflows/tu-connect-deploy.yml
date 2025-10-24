@@ -27,13 +27,16 @@ jobs:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
 
       - name: Deploy Bicep Infrastructure
-        uses: azure/arm-deploy@v1
+        uses: Azure/bicep-deploy@v2
         with:
           scope: subscription
           subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           region: centralus
-          template: ./infrastructure/main.bicep
-          parameters: 'location=centralus environment=prod appName=tuconnect appServicePlanSku=S1 sqlDatabaseSku=S0 sqlAdminLogin=tuconnectsqladmin sqlAdminPassword=${{ secrets.SQL_ADMIN_PASSWORD }} jwtSecret=${{ secrets.JWT_SECRET }}'
+          bicepFilePath: ./infrastructure/main.bicep
+          paramFilePath: ./infrastructure/main.bicepparam
+          parameters: |
+            sqlAdminPassword=${{ secrets.SQL_ADMIN_PASSWORD }}
+            jwtSecret=${{ secrets.JWT_SECRET }}
 
   build-backend:
     runs-on: ubuntu-latest
