@@ -35,7 +35,7 @@ jobs:
           scope: subscription
           location: ${{ vars.AZURE_REGION }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          environment: azurecloud
+          environment: azureCloud
           template-file: ./infrastructure/main.bicep
           parameters-file: ./infrastructure/main.bicepparam
           parameters: '{"location": "${{ vars.AZURE_REGION }}", "sqlAdminPassword": "${{ secrets.SQL_ADMIN_PASSWORD }}", "jwtSecret": "${{ secrets.JWT_SECRET }}"}'
