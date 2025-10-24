@@ -29,12 +29,18 @@ jobs:
       - name: Deploy Bicep Infrastructure
         uses: Azure/bicep-deploy@v2
         with:
+          name: 'tu-connect-infrastructure-deployment'
+          type: deployment
+          operation: create
           scope: subscription
-          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          location: ${{ vars.AZURE_REGION }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          environment: azurecloud
           region: centralus
-          bicepFilePath: ./infrastructure/main.bicep
-          paramFilePath: ./infrastructure/main.bicepparam
+          template-file: ./infrastructure/main.bicep
+          parameters-file: ./infrastructure/main.bicepparam
           parameters: |
+            location: ${{ vars.AZURE_REGION }}
             sqlAdminPassword=${{ secrets.SQL_ADMIN_PASSWORD }}
             jwtSecret=${{ secrets.JWT_SECRET }}
 
