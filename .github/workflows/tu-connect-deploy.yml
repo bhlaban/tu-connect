@@ -34,7 +34,6 @@ jobs:
           region: centralus
           template: ./infrastructure/main.bicep
           parameters: |
-            location=centralus
             environment=prod
             appName=tu-connect
             appServicePlanSku=S1
