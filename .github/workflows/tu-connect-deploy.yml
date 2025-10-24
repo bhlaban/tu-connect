@@ -31,10 +31,10 @@ jobs:
         with:
           scope: subscription
           subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          region: 'North Central US'
+          region: centralus
           template: ./infrastructure/main.bicep
           parameters: |
-            location=North Central US
+            location=centralus
             environment=prod
             appName=tu-connect
             appServicePlanSku=S1
