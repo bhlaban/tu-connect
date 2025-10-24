@@ -36,7 +36,6 @@ jobs:
           location: ${{ vars.AZURE_REGION }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           environment: azurecloud
-          region: centralus
           template-file: ./infrastructure/main.bicep
           parameters-file: ./infrastructure/main.bicepparam
           parameters: |
