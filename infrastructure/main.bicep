@@ -33,7 +33,7 @@ param jwtSecret string
 var resourceNamePrefix = '${appName}-${environment}'
 var resourceGroupName = '${resourceNamePrefix}-rg'
 var sqlServerName = '${resourceNamePrefix}-sql'
-var sqlDatabaseName = '${appName}-db'
+var sqlDatabaseName = '${resourceNamePrefix}-db'
 var appServicePlanName = '${resourceNamePrefix}-plan'
 var backendAppName = '${resourceNamePrefix}-backend'
 var frontendAppName = '${resourceNamePrefix}-frontend'
