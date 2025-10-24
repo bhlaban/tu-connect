@@ -16,15 +16,6 @@
     },
     "sqlDatabaseSku": {
       "value": "Basic"
-    },
-    "sqlAdminLogin": {
-      "value": "tu-connect-sql-admin"
-    },
-    "sqlAdminPassword": {
-      "value": "F0xV@lleyTU193!"
-    },
-    "jwtSecret": {
-      "value": "9b282cf165808705f8037939463e3455d140b5f769bedd620c2347125488ffb7"
     }
   }
 }
