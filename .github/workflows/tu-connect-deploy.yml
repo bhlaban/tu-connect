@@ -38,10 +38,7 @@ jobs:
           environment: azurecloud
           template-file: ./infrastructure/main.bicep
           parameters-file: ./infrastructure/main.bicepparam
-          parameters: |
-            location: ${{ vars.AZURE_REGION }}
-            sqlAdminPassword=${{ secrets.SQL_ADMIN_PASSWORD }}
-            jwtSecret=${{ secrets.JWT_SECRET }}
+          parameters: '{"location": "${{ vars.AZURE_REGION }}", "sqlAdminPassword": "${{ secrets.SQL_ADMIN_PASSWORD }}", "jwtSecret": "${{ secrets.JWT_SECRET }}"}'
 
   build-backend:
     runs-on: ubuntu-latest
