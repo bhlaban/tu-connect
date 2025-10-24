@@ -34,12 +34,12 @@ jobs:
           region: centralus
           template: ./infrastructure/main.bicep
           parameters: |
-            location='centralus'
-            environment='prod'
-            appName='tu-connect'
-            appServicePlanSku='S1'
-            sqlDatabaseSku='S0'
-            sqlAdminLogin=${{ secrets.SQL_ADMIN_LOGIN }}
+            location=centralus
+            environment=prod
+            appName=tu-connect
+            appServicePlanSku=S1
+            sqlDatabaseSku=S0
+            sqlAdminLogin=tu-connect-sql-admin
             sqlAdminPassword=${{ secrets.SQL_ADMIN_PASSWORD }}
             jwtSecret=${{ secrets.JWT_SECRET }}
 
