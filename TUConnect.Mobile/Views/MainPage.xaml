@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:TUConnect.Mobile.ViewModels"
+             x:Class="TUConnect.Mobile.Views.MainPage"
+             x:DataType="viewmodels:MainViewModel"
+             Title="Home">
+
+    <ScrollView>
+        <VerticalStackLayout
+            Spacing="25"
+            Padding="30,0"
+            VerticalOptions="Center">
+
+            <Image
+                Source="dotnet_bot.png"
+                SemanticProperties.Description="TU Connect logo"
+                HeightRequest="200"
+                HorizontalOptions="Center" />
+
+            <Label
+                Text="{Binding WelcomeMessage}"
+                SemanticProperties.HeadingLevel="Level1"
+                FontSize="32"
+                HorizontalOptions="Center" />
+
+            <Label
+                Text="Manage volunteer time and fishing logs for your TU chapter"
+                SemanticProperties.HeadingLevel="Level2"
+                SemanticProperties.Description="Manages volunteer time and fishing logs"
+                FontSize="18"
+                HorizontalOptions="Center" />
+
+            <Button
+                x:Name="LoadDashboardBtn"
+                Text="Load Dashboard"
+                SemanticProperties.Hint="Loads dashboard data"
+                Command="{Binding LoadDashboardCommand}"
+                HorizontalOptions="Center" />
+
+            <Label
+                Text="{Binding TotalMembers, StringFormat='Total Members: {0}'}"
+                FontSize="18"
+                HorizontalOptions="Center"
+                IsVisible="{Binding TotalMembers, Converter={StaticResource IsGreaterThanZeroConverter}}" />
+
+            <ActivityIndicator
+                IsRunning="{Binding IsLoading}"
+                IsVisible="{Binding IsLoading}"
+                HorizontalOptions="Center" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

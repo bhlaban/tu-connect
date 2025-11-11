@@ -1,0 +1,131 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "TU Connect API",
+    "description": "API for managing Trout Unlimited chapter volunteer time and fishing logs",
+    "version": "1.0"
+  },
+  "host": "tuconnect-api.azurewebsites.net",
+  "basePath": "/api",
+  "schemes": ["https"],
+  "paths": {
+    "/members": {
+      "get": {
+        "tags": ["Members"],
+        "summary": "Get all members",
+        "operationId": "GetMembers",
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Member"
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Members"],
+        "summary": "Create a new member",
+        "operationId": "CreateMember",
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Member"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    },
+    "/volunteertime": {
+      "get": {
+        "tags": ["VolunteerTime"],
+        "summary": "Get all volunteer time entries",
+        "operationId": "GetVolunteerTimeEntries",
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/VolunteerTimeEntry"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fishinglogs": {
+      "get": {
+        "tags": ["FishingLogs"],
+        "summary": "Get all fishing logs",
+        "operationId": "GetFishingLogs",
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/FishingLog"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Member": {
+      "type": "object",
+      "properties": {
+        "id": {"type": "integer"},
+        "firstName": {"type": "string"},
+        "lastName": {"type": "string"},
+        "email": {"type": "string"},
+        "phone": {"type": "string"},
+        "joinDate": {"type": "string", "format": "date-time"},
+        "isActive": {"type": "boolean"}
+      }
+    },
+    "VolunteerTimeEntry": {
+      "type": "object",
+      "properties": {
+        "id": {"type": "integer"},
+        "memberId": {"type": "integer"},
+        "eventDate": {"type": "string", "format": "date-time"},
+        "eventType": {"type": "string"},
+        "eventName": {"type": "string"},
+        "hoursWorked": {"type": "number"},
+        "description": {"type": "string"},
+        "location": {"type": "string"}
+      }
+    },
+    "FishingLog": {
+      "type": "object",
+      "properties": {
+        "id": {"type": "integer"},
+        "memberId": {"type": "integer"},
+        "fishingDate": {"type": "string", "format": "date-time"},
+        "location": {"type": "string"},
+        "troutSpecies": {"type": "string"},
+        "fishCaught": {"type": "integer"},
+        "fishKept": {"type": "integer"}
+      }
+    }
+  }
+}

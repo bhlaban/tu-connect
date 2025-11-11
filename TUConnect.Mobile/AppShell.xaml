@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="TUConnect.Mobile.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:TUConnect.Mobile.Views"
+    Title="TU Connect">
+
+    <TabBar>
+        <ShellContent
+            Title="Home"
+            ContentTemplate="{DataTemplate local:MainPage}"
+            Route="MainPage"
+            Icon="home.png" />
+
+        <ShellContent
+            Title="Volunteer Time"
+            ContentTemplate="{DataTemplate local:VolunteerTimePage}"
+            Route="VolunteerTimePage"
+            Icon="volunteer.png" />
+
+        <ShellContent
+            Title="Fishing Logs"
+            ContentTemplate="{DataTemplate local:FishingLogPage}"
+            Route="FishingLogPage"
+            Icon="fishing.png" />
+
+        <ShellContent
+            Title="Members"
+            ContentTemplate="{DataTemplate local:MembersPage}"
+            Route="MembersPage"
+            Icon="members.png" />
+    </TabBar>
+
+</Shell>
