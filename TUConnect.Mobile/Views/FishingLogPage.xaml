@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:TUConnect.Mobile.ViewModels"
+             x:Class="TUConnect.Mobile.Views.FishingLogPage"
+             x:DataType="viewmodels:FishingLogViewModel"
+             Title="Fishing Logs">
+
+    <Grid RowDefinitions="Auto,*,Auto" Padding="10">
+        <!-- Header -->
+        <Button
+            Grid.Row="0"
+            Text="Add Log"
+            Command="{Binding AddLogCommand}"
+            HorizontalOptions="End"
+            Margin="0,10" />
+
+        <!-- List -->
+        <CollectionView
+            Grid.Row="1"
+            ItemsSource="{Binding FishingLogs}"
+            SelectionMode="Single"
+            SelectedItem="{Binding SelectedLog}">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <SwipeView>
+                        <SwipeView.RightItems>
+                            <SwipeItems>
+                                <SwipeItem
+                                    Text="Delete"
+                                    BackgroundColor="Red"
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type viewmodels:FishingLogViewModel}}, Path=DeleteLogCommand}"
+                                    CommandParameter="{Binding .}" />
+                            </SwipeItems>
+                        </SwipeView.RightItems>
+                        <Frame Padding="10" Margin="5" BorderColor="LightGray">
+                            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto,Auto">
+                                <Label
+                                    Grid.Row="0"
+                                    Grid.Column="0"
+                                    Text="{Binding Location}"
+                                    FontAttributes="Bold"
+                                    FontSize="18" />
+                                <Label
+                                    Grid.Row="0"
+                                    Grid.Column="1"
+                                    Text="{Binding FishCaught, StringFormat='{0} fish'}"
+                                    FontSize="16"
+                                    HorizontalOptions="End" />
+                                <Label
+                                    Grid.Row="1"
+                                    Grid.Column="0"
+                                    Text="{Binding TroutSpecies}"
+                                    FontSize="14"
+                                    TextColor="Gray" />
+                                <Label
+                                    Grid.Row="2"
+                                    Grid.Column="0"
+                                    Grid.ColumnSpan="2"
+                                    Text="{Binding FishingDate, StringFormat='{0:MMM dd, yyyy}'}"
+                                    FontSize="12"
+                                    TextColor="Gray" />
+                                <Label
+                                    Grid.Row="3"
+                                    Grid.Column="0"
+                                    Grid.ColumnSpan="2"
+                                    Text="{Binding StreamName}"
+                                    FontSize="12"
+                                    TextColor="Gray"
+                                    IsVisible="{Binding StreamName, Converter={StaticResource IsNotNullOrEmptyConverter}}" />
+                            </Grid>
+                        </Frame>
+                    </SwipeView>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <!-- Loading Indicator -->
+        <ActivityIndicator
+            Grid.Row="1"
+            IsRunning="{Binding IsLoading}"
+            IsVisible="{Binding IsLoading}"
+            HorizontalOptions="Center"
+            VerticalOptions="Center" />
+
+        <!-- Load Button -->
+        <Button
+            Grid.Row="2"
+            Text="Refresh"
+            Command="{Binding LoadLogsCommand}"
+            HorizontalOptions="Center"
+            Margin="0,10" />
+    </Grid>
+
+</ContentPage>

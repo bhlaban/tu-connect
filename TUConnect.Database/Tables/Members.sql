@@ -1,0 +1,13 @@
+CREATE TABLE [dbo].[Members]
+(
+    [Id] INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    [FirstName] NVARCHAR(100) NOT NULL,
+    [LastName] NVARCHAR(100) NOT NULL,
+    [Email] NVARCHAR(255) NOT NULL UNIQUE,
+    [Phone] NVARCHAR(20) NULL,
+    [JoinDate] DATETIME2 NOT NULL,
+    [IsActive] BIT NOT NULL DEFAULT 1,
+    [CreatedAt] DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    [UpdatedAt] DATETIME2 NULL,
+    INDEX [IX_Members_Email] ([Email])
+)

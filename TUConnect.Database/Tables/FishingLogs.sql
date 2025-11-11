@@ -1,0 +1,27 @@
+CREATE TABLE [dbo].[FishingLogs]
+(
+    [Id] INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    [MemberId] INT NOT NULL,
+    [FishingDate] DATETIME2 NOT NULL,
+    [Location] NVARCHAR(200) NOT NULL,
+    [StreamName] NVARCHAR(200) NULL,
+    [County] NVARCHAR(100) NULL,
+    [State] NVARCHAR(50) NULL,
+    [TroutSpecies] NVARCHAR(100) NOT NULL,
+    [FishCaught] INT NOT NULL,
+    [FishKept] INT NOT NULL,
+    [LargestFishLength] DECIMAL(5,2) NULL,
+    [LargestFishWeight] DECIMAL(5,2) NULL,
+    [WaterCondition] NVARCHAR(50) NULL,
+    [WaterTemperature] DECIMAL(4,1) NULL,
+    [Weather] NVARCHAR(100) NULL,
+    [FlyPattern] NVARCHAR(100) NULL,
+    [Technique] NVARCHAR(100) NULL,
+    [Notes] NVARCHAR(2000) NULL,
+    [CreatedAt] DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    [UpdatedAt] DATETIME2 NULL,
+    CONSTRAINT [FK_FishingLogs_Members] FOREIGN KEY ([MemberId]) REFERENCES [dbo].[Members]([Id]) ON DELETE CASCADE,
+    INDEX [IX_FishingLogs_MemberId] ([MemberId]),
+    INDEX [IX_FishingLogs_FishingDate] ([FishingDate]),
+    INDEX [IX_FishingLogs_TroutSpecies] ([TroutSpecies])
+)
